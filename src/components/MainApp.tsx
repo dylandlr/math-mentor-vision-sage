@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navbar } from '@/components/layout/Navbar';
@@ -11,6 +10,7 @@ import { MentorPage } from '@/components/pages/MentorPage';
 import { LessonsPage } from '@/components/pages/LessonsPage';
 import { AchievementsPage } from '@/components/pages/AchievementsPage';
 import { PracticePage } from '@/components/pages/PracticePage';
+import { CoursePage } from '@/components/pages/CoursePage';
 
 export const MainApp = () => {
   const { user, profile, loading } = useAuth();
@@ -80,6 +80,8 @@ export const MainApp = () => {
       switch (currentPath) {
         case '/dashboard':
           return <StudentDashboard />;
+        case '/courses':
+          return <CoursePage />;
         case '/lessons':
           return <LessonsPage />;
         case '/mentor':

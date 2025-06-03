@@ -26,6 +26,7 @@ export const Sidebar = ({ userRole, currentPath, onNavigate }: SidebarProps) => 
 
   const studentItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
+    { icon: BookOpen, label: 'Courses', path: '/courses' },
     { icon: BookOpen, label: 'Lessons', path: '/lessons' },
     { icon: Brain, label: 'AI Mentor', path: '/mentor' },
     { icon: Trophy, label: 'Achievements', path: '/achievements' },

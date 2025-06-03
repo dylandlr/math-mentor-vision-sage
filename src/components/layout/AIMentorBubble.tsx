@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X, Send, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -17,7 +17,7 @@ export const AIMentorBubble = ({ onOpenMentor, className }: AIMentorBubbleProps)
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputMessage, setInputMessage] = useState('');
   
-  const { messages, isTyping, sendMessage } = useAIChat(
+  const { messages, isTyping, isOffline, sendMessage } = useAIChat(
     "Hi! I'm here to help with any math questions. Ask me anything or click to open the full chat!"
   );
 
@@ -36,7 +36,10 @@ export const AIMentorBubble = ({ onOpenMentor, className }: AIMentorBubbleProps)
       className
     )}>
       <Card className={cn(
-        "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transition-all duration-300",
+        "bg-gradient-to-r text-white shadow-lg transition-all duration-300",
+        isOffline 
+          ? "from-orange-500 to-red-600" 
+          : "from-blue-500 to-purple-600",
         isExpanded ? "w-80 h-96" : "w-auto"
       )}>
         {!isExpanded ? (
@@ -44,11 +47,18 @@ export const AIMentorBubble = ({ onOpenMentor, className }: AIMentorBubbleProps)
             <div className="flex items-center justify-between space-x-3">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                  <MessageCircle size={16} />
+                  {isOffline ? <WifiOff size={16} /> : <MessageCircle size={16} />}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">AI Mentor</p>
-                  <p className="text-xs opacity-90">Need help? Just ask!</p>
+                  <div className="flex items-center space-x-1">
+                    <p className="text-sm font-medium">AI Mentor</p>
+                    {isOffline && (
+                      <div className="w-2 h-2 bg-orange-300 rounded-full animate-pulse"></div>
+                    )}
+                  </div>
+                  <p className="text-xs opacity-90">
+                    {isOffline ? "Reconnecting..." : "Need help? Just ask!"}
+                  </p>
                 </div>
               </div>
               <div className="flex space-x-1">
@@ -84,9 +94,14 @@ export const AIMentorBubble = ({ onOpenMentor, className }: AIMentorBubbleProps)
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2">
                 <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                  <MessageCircle size={12} />
+                  {isOffline ? <WifiOff size={12} /> : <MessageCircle size={12} />}
                 </div>
-                <span className="text-sm font-medium">AI Mentor</span>
+                <div className="flex items-center space-x-1">
+                  <span className="text-sm font-medium">AI Mentor</span>
+                  {isOffline && (
+                    <div className="w-2 h-2 bg-orange-300 rounded-full animate-pulse"></div>
+                  )}
+                </div>
               </div>
               <div className="flex space-x-1">
                 <Button
@@ -116,7 +131,9 @@ export const AIMentorBubble = ({ onOpenMentor, className }: AIMentorBubbleProps)
                   className={`text-xs p-2 rounded ${
                     message.isUser 
                       ? 'bg-white/20 ml-4' 
-                      : 'bg-white/10 mr-4'
+                      : message.isOffline
+                        ? 'bg-orange-200/20 mr-4 border border-orange-300/30'
+                        : 'bg-white/10 mr-4'
                   }`}
                 >
                   {message.content}
@@ -137,7 +154,7 @@ export const AIMentorBubble = ({ onOpenMentor, className }: AIMentorBubbleProps)
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Ask me anything..."
+                placeholder={isOffline ? "AI reconnecting..." : "Ask me anything..."}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                 disabled={isTyping}
                 className="text-xs h-8 bg-white/20 border-white/30 text-white placeholder-white/70"

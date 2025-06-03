@@ -46,12 +46,12 @@ export const Sidebar = ({ userRole, currentPath, onNavigate }: SidebarProps) => 
 
   return (
     <div className={cn(
-      "bg-white border-r h-screen sticky top-16 transition-all duration-300",
+      "bg-background border-r border-border h-screen sticky top-16 transition-all duration-300",
       collapsed ? "w-16" : "w-64"
     )}>
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         {!collapsed && (
-          <h2 className="font-semibold text-gray-800">
+          <h2 className="font-semibold text-foreground">
             {userRole === 'student' ? 'Learning Hub' : 'Teaching Hub'}
           </h2>
         )}
@@ -73,8 +73,8 @@ export const Sidebar = ({ userRole, currentPath, onNavigate }: SidebarProps) => 
             className={cn(
               "w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors",
               currentPath === item.path 
-                ? "bg-blue-50 text-blue-700 border border-blue-200" 
-                : "text-gray-600 hover:bg-gray-50"
+                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700" 
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
           >
             <item.icon size={20} />

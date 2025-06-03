@@ -42,7 +42,7 @@ export const Navbar = ({ userRole, userName, onNavigate }: NavbarProps) => {
   };
 
   return (
-    <nav className="border-b bg-white/80 backdrop-blur-lg sticky top-0 z-50">
+    <nav className="border-b bg-background/80 backdrop-blur-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -62,7 +62,7 @@ export const Navbar = ({ userRole, userName, onNavigate }: NavbarProps) => {
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
                   {userName.charAt(0).toUpperCase()}
                 </div>
-                <span className="hidden sm:block">{userName}</span>
+                <span className="hidden sm:block text-foreground">{userName}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
@@ -75,7 +75,7 @@ export const Navbar = ({ userRole, userName, onNavigate }: NavbarProps) => {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600" onClick={handleSignOut}>
+              <DropdownMenuItem className="text-red-600 dark:text-red-400" onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </DropdownMenuItem>

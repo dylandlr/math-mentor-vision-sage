@@ -1,6 +1,6 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 
 export const SettingsPage = () => {
   const { user, profile } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [loading, setLoading] = useState(false);
   
   // Profile settings
@@ -43,7 +44,6 @@ export const SettingsPage = () => {
   const [achievementNotifications, setAchievementNotifications] = useState(true);
   
   // Appearance settings
-  const [theme, setTheme] = useState('system');
   const [fontSize, setFontSize] = useState('medium');
   const [language, setLanguage] = useState('en');
   
@@ -101,12 +101,12 @@ export const SettingsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-          <p className="text-gray-600">Customize your learning experience</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Settings</h1>
+          <p className="text-gray-600 dark:text-gray-400">Customize your learning experience</p>
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
@@ -158,7 +158,7 @@ export const SettingsPage = () => {
                       id="email"
                       value={email}
                       disabled
-                      className="bg-gray-100"
+                      className="bg-gray-100 dark:bg-gray-800"
                     />
                   </div>
 
@@ -213,7 +213,7 @@ export const SettingsPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label className="text-base">Email Notifications</Label>
-                    <p className="text-sm text-gray-500">Receive updates via email</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Receive updates via email</p>
                   </div>
                   <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
                 </div>
@@ -223,7 +223,7 @@ export const SettingsPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label className="text-base">Push Notifications</Label>
-                    <p className="text-sm text-gray-500">Browser notifications for important updates</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Browser notifications for important updates</p>
                   </div>
                   <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
                 </div>
@@ -233,7 +233,7 @@ export const SettingsPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label className="text-base">Lesson Reminders</Label>
-                    <p className="text-sm text-gray-500">Daily reminders to complete lessons</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Daily reminders to complete lessons</p>
                   </div>
                   <Switch checked={lessonReminders} onCheckedChange={setLessonReminders} />
                 </div>
@@ -243,7 +243,7 @@ export const SettingsPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label className="text-base">Achievement Notifications</Label>
-                    <p className="text-sm text-gray-500">Get notified when you earn badges or complete milestones</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Get notified when you earn badges or complete milestones</p>
                   </div>
                   <Switch checked={achievementNotifications} onCheckedChange={setAchievementNotifications} />
                 </div>

@@ -25,12 +25,12 @@ export const TeacherDashboard = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-6 bg-background min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Teacher Dashboard</h1>
-          <p className="text-gray-600">Manage your classes and track student progress</p>
+          <h1 className="text-3xl font-bold text-foreground">Teacher Dashboard</h1>
+          <p className="text-muted-foreground">Manage your classes and track student progress</p>
         </div>
         <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
           <Plus size={16} className="mr-2" />
@@ -45,8 +45,8 @@ export const TeacherDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">{stat.label}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                 </div>
                 <stat.icon className={stat.color} size={24} />
               </div>
@@ -58,14 +58,14 @@ export const TeacherDashboard = () => {
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Recent Classes */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-2xl font-bold text-gray-800">Your Classes</h2>
+          <h2 className="text-2xl font-bold text-foreground">Your Classes</h2>
           {recentClasses.map((classItem, index) => (
             <Card key={index} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold">{classItem.name}</h3>
-                    <p className="text-gray-600">{classItem.students} students • Last activity: {classItem.lastActivity}</p>
+                    <h3 className="text-lg font-semibold text-foreground">{classItem.name}</h3>
+                    <p className="text-muted-foreground">{classItem.students} students • Last activity: {classItem.lastActivity}</p>
                   </div>
                   <Button variant="outline" size="sm">
                     View Class
@@ -73,8 +73,8 @@ export const TeacherDashboard = () => {
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>Average Score</span>
-                    <span>{classItem.avgScore}%</span>
+                    <span className="text-muted-foreground">Average Score</span>
+                    <span className="text-foreground">{classItem.avgScore}%</span>
                   </div>
                   <Progress value={classItem.avgScore} className="h-2" />
                 </div>
@@ -94,10 +94,10 @@ export const TeacherDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {studentsNeedingHelp.map((student, index) => (
-                <div key={index} className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                  <p className="font-medium text-sm">{student.name}</p>
-                  <p className="text-xs text-gray-600 mb-1">{student.course}</p>
-                  <p className="text-sm text-orange-700">{student.issue}</p>
+                <div key={index} className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
+                  <p className="font-medium text-sm text-foreground">{student.name}</p>
+                  <p className="text-xs text-muted-foreground mb-1">{student.course}</p>
+                  <p className="text-sm text-orange-700 dark:text-orange-400">{student.issue}</p>
                   <Button size="sm" variant="outline" className="mt-2 text-xs">
                     View Details
                   </Button>

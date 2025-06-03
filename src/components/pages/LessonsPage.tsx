@@ -73,10 +73,10 @@ export const LessonsPage = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-100 text-green-800';
-      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'beginner': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'intermediate': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'advanced': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
   };
 
@@ -91,7 +91,7 @@ export const LessonsPage = () => {
   );
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto bg-background min-h-screen">
       <div className="mb-6">
         <div className="flex items-center space-x-3 mb-4">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 rounded-lg">
@@ -105,11 +105,11 @@ export const LessonsPage = () => {
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Overall Progress</h3>
+              <h3 className="text-lg font-semibold text-foreground">Overall Progress</h3>
               <span className="text-2xl font-bold text-blue-600">{overallProgress}%</span>
             </div>
             <Progress value={overallProgress} className="h-3" />
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               {lessons.filter(l => l.isCompleted).length} of {lessons.length} lessons completed
             </p>
           </CardContent>
@@ -121,19 +121,19 @@ export const LessonsPage = () => {
           <Card key={lesson.id} className={`relative ${lesson.isLocked ? 'opacity-60' : ''}`}>
             <CardHeader>
               <div className="flex items-start justify-between">
-                <CardTitle className="text-lg">{lesson.title}</CardTitle>
+                <CardTitle className="text-lg text-foreground">{lesson.title}</CardTitle>
                 {lesson.isCompleted && (
                   <CheckCircle className="text-green-500 h-6 w-6" />
                 )}
                 {lesson.isLocked && (
-                  <Lock className="text-gray-400 h-6 w-6" />
+                  <Lock className="text-muted-foreground h-6 w-6" />
                 )}
               </div>
               <div className="flex items-center space-x-2">
                 <Badge className={getDifficultyColor(lesson.difficulty)}>
                   {lesson.difficulty}
                 </Badge>
-                <div className="flex items-center text-sm text-gray-500">
+                <div className="flex items-center text-sm text-muted-foreground">
                   <Clock size={14} className="mr-1" />
                   {lesson.duration} min
                 </div>
@@ -141,7 +141,7 @@ export const LessonsPage = () => {
             </CardHeader>
             
             <CardContent>
-              <p className="text-gray-600 mb-4">{lesson.description}</p>
+              <p className="text-muted-foreground mb-4">{lesson.description}</p>
               
               <div className="mb-4">
                 <div className="flex flex-wrap gap-1">
@@ -156,8 +156,8 @@ export const LessonsPage = () => {
               {!lesson.isLocked && !lesson.isCompleted && lesson.progress > 0 && (
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Progress</span>
-                    <span className="text-sm font-medium">{lesson.progress}%</span>
+                    <span className="text-sm text-muted-foreground">Progress</span>
+                    <span className="text-sm font-medium text-foreground">{lesson.progress}%</span>
                   </div>
                   <Progress value={lesson.progress} className="h-2" />
                 </div>

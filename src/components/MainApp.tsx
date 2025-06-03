@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navbar } from '@/components/layout/Navbar';
@@ -35,10 +36,10 @@ export const MainApp = () => {
   // Show loading if still loading
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Setting up your profile...</p>
+          <p className="mt-4 text-muted-foreground">Setting up your profile...</p>
         </div>
       </div>
     );
@@ -47,7 +48,7 @@ export const MainApp = () => {
   // Show role selection if user exists but no profile (OAuth users)
   if (user && !profile) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <RoleSelectionDialog
           isOpen={true}
           onRoleSelect={handleRoleSelect}
@@ -60,10 +61,10 @@ export const MainApp = () => {
   // If no profile after loading, something went wrong
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2 text-gray-900">Profile Setup Required</h2>
-          <p className="text-gray-600 mb-4">We need to set up your profile to continue.</p>
+          <h2 className="text-xl font-semibold mb-2 text-foreground">Profile Setup Required</h2>
+          <p className="text-muted-foreground mb-4">We need to set up your profile to continue.</p>
           <button 
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -113,11 +114,11 @@ export const MainApp = () => {
         case '/teacher/courses':
           return <TeacherContentGenerator />;
         case '/teacher/students':
-          return <div className="p-6">Student management coming soon...</div>;
+          return <div className="p-6 text-foreground">Student management coming soon...</div>;
         case '/teacher/analytics':
-          return <div className="p-6">Analytics page coming soon...</div>;
+          return <div className="p-6 text-foreground">Analytics page coming soon...</div>;
         case '/teacher/messages':
-          return <div className="p-6">Messages page coming soon...</div>;
+          return <div className="p-6 text-foreground">Messages page coming soon...</div>;
         default:
           return <TeacherDashboard />;
       }
@@ -125,7 +126,7 @@ export const MainApp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar userRole={userRole} userName={userName} onNavigate={handleNavigate} />
       <div className="flex">
         <Sidebar 
@@ -133,7 +134,7 @@ export const MainApp = () => {
           currentPath={currentPath} 
           onNavigate={handleNavigate} 
         />
-        <main className="flex-1">
+        <main className="flex-1 bg-background">
           {renderContent()}
         </main>
       </div>

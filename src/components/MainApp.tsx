@@ -7,6 +7,10 @@ import { StudentDashboard } from '@/components/dashboard/StudentDashboard';
 import { TeacherDashboard } from '@/components/dashboard/TeacherDashboard';
 import { AIMentorBubble } from '@/components/layout/AIMentorBubble';
 import { RoleSelectionDialog } from '@/components/auth/RoleSelectionDialog';
+import { MentorPage } from '@/components/pages/MentorPage';
+import { LessonsPage } from '@/components/pages/LessonsPage';
+import { AchievementsPage } from '@/components/pages/AchievementsPage';
+import { PracticePage } from '@/components/pages/PracticePage';
 
 export const MainApp = () => {
   const { user, profile, loading } = useAuth();
@@ -77,13 +81,13 @@ export const MainApp = () => {
         case '/dashboard':
           return <StudentDashboard />;
         case '/lessons':
-          return <div className="p-6">Lessons page coming soon...</div>;
+          return <LessonsPage />;
         case '/mentor':
-          return <div className="p-6">AI Mentor page coming soon...</div>;
+          return <MentorPage />;
         case '/achievements':
-          return <div className="p-6">Achievements page coming soon...</div>;
+          return <AchievementsPage />;
         case '/practice':
-          return <div className="p-6">Practice page coming soon...</div>;
+          return <PracticePage />;
         default:
           return <StudentDashboard />;
       }

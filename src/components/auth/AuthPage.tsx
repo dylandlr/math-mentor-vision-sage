@@ -129,7 +129,7 @@ export const AuthPage = () => {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" disabled={loading}>
                   {loading ? 'Signing in...' : 'Sign In'}
                 </Button>
               </form>
@@ -170,7 +170,7 @@ export const AuthPage = () => {
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" disabled={loading}>
                   {loading ? 'Creating account...' : 'Create Account'}
                 </Button>
               </form>
@@ -182,7 +182,7 @@ export const AuthPage = () => {
             <div className="space-y-3">
               <Button
                 variant="outline"
-                className="w-full"
+                className="w-full border-2 border-gradient-to-r from-blue-600 to-purple-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50"
                 onClick={() => handleOAuthClick('google')}
                 disabled={loading}
               >
@@ -191,7 +191,7 @@ export const AuthPage = () => {
               </Button>
               <Button
                 variant="outline"
-                className="w-full"
+                className="w-full border-2 border-gradient-to-r from-blue-600 to-purple-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50"
                 onClick={() => handleOAuthClick('github')}
                 disabled={loading}
               >

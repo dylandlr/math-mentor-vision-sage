@@ -21,38 +21,48 @@ export const MainApp = () => {
   };
 
   const handleRoleSelect = () => {
-    // After role selection, the profile will be automatically updated via auth state change
-    // The component will re-render with the new profile
+    // Force a reload to refresh the profile data after role selection
     window.location.reload();
   };
 
   // Show loading if still loading
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Setting up your profile...</p>
+        </div>
       </div>
     );
   }
 
-  // Show role selection if user exists but no profile
+  // Show role selection if user exists but no profile (OAuth users)
   if (user && !profile) {
     return (
-      <RoleSelectionDialog
-        isOpen={true}
-        onRoleSelect={handleRoleSelect}
-        userEmail={user.email || 'User'}
-      />
+      <div className="min-h-screen bg-gray-50">
+        <RoleSelectionDialog
+          isOpen={true}
+          onRoleSelect={handleRoleSelect}
+          userEmail={user.email || 'User'}
+        />
+      </div>
     );
   }
 
-  // If no profile, something went wrong
+  // If no profile after loading, something went wrong
   if (!profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
-          <p className="text-gray-600">Unable to load your profile. Please try refreshing the page.</p>
+          <h2 className="text-xl font-semibold mb-2 text-gray-900">Profile Setup Required</h2>
+          <p className="text-gray-600 mb-4">We need to set up your profile to continue.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry Setup
+          </button>
         </div>
       </div>
     );

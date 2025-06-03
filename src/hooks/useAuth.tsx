@@ -26,6 +26,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('Setting up auth state listener...');
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -36,14 +38,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (session?.user) {
           console.log('User session found, handling profile...');
-          // Use setTimeout to avoid blocking the auth callback
+          // Handle profile in a non-blocking way
           setTimeout(async () => {
             try {
               const userProfile = await profileService.handleUserProfile(session.user);
+              console.log('Profile handled:', userProfile);
               setProfile(userProfile);
-              setLoading(false);
             } catch (error) {
               console.error('Error handling user profile:', error);
+              // Set profile to null so user can retry
+              setProfile(null);
+            } finally {
               setLoading(false);
             }
           }, 100);
@@ -58,8 +63,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session check:', session?.user?.id);
-      setSession(session);
-      setUser(session?.user ?? null);
       if (!session) {
         setLoading(false);
       }

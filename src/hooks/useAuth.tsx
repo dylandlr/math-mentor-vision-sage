@@ -123,11 +123,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithGoogle = async (role?: 'student' | 'teacher') => {
     console.log('Initiating Google OAuth with role:', role);
+    
+    // Store role in localStorage temporarily to be used after OAuth callback
+    if (role) {
+      localStorage.setItem('pending_oauth_role', role);
+    }
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/`,
-        data: role ? { role } : undefined
+        queryParams: role ? { role } : undefined
       }
     });
     return { error };
@@ -135,11 +141,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithGithub = async (role?: 'student' | 'teacher') => {
     console.log('Initiating GitHub OAuth with role:', role);
+    
+    // Store role in localStorage temporarily to be used after OAuth callback
+    if (role) {
+      localStorage.setItem('pending_oauth_role', role);
+    }
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
         redirectTo: `${window.location.origin}/`,
-        data: role ? { role } : undefined
+        queryParams: role ? { role } : undefined
       }
     });
     return { error };

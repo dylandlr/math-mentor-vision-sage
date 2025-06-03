@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Brain, Send, User, Bot, Wifi, WifiOff } from 'lucide-react';
 import { useAIChat } from '@/hooks/useAIChat';
+import { cn } from '@/lib/utils';
 
 export const MentorPage = () => {
   const [inputMessage, setInputMessage] = useState('');

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,6 +32,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
+        console.log('User metadata:', session?.user?.user_metadata);
+        console.log('App metadata:', session?.user?.app_metadata);
+        
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -54,6 +56,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                   .select('*')
                   .eq('id', session.user.id)
                   .single();
+
+                console.log('Profile query result:', { existingProfile, error });
 
                 if (error && error.code !== 'PGRST116') {
                   console.error('Error checking profile:', error);
@@ -151,12 +155,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const createProfile = async (user: User, role?: 'student' | 'teacher') => {
     try {
       console.log('Creating profile for user:', user.id, 'with role:', role);
+      console.log('User email:', user.email);
+      console.log('User metadata:', user.user_metadata);
+      
       const profileData = {
         id: user.id,
         email: user.email,
         full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
         role: role || user.user_metadata?.role || 'student'
       };
+
+      console.log('Profile data to insert:', profileData);
 
       const { data, error } = await supabase
         .from('profiles')
@@ -166,6 +175,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) {
         console.error('Error creating profile:', error);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
+        console.error('Error message:', error.message);
         throw error;
       }
 
@@ -174,6 +186,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Create initial points for students
       if (profileData.role === 'student') {
+        console.log('Creating student points...');
         const { error: pointsError } = await supabase
           .from('student_points')
           .insert([{
@@ -184,6 +197,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (pointsError) {
           console.error('Error creating student points:', pointsError);
+        } else {
+          console.log('Student points created successfully');
         }
       }
     } catch (error) {

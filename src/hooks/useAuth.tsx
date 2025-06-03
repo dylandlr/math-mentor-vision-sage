@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,14 +8,11 @@ interface AuthContextType {
   session: Session | null;
   profile: any | null;
   loading: boolean;
-  showRoleDialog: boolean;
-  pendingUser: User | null;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, metadata?: any) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
-  signInWithGithub: () => Promise<{ error: any }>;
+  signInWithGoogle: (role?: 'student' | 'teacher') => Promise<{ error: any }>;
+  signInWithGithub: (role?: 'student' | 'teacher') => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
-  completeOAuthSignup: (role: 'student' | 'teacher') => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,8 +22,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showRoleDialog, setShowRoleDialog] = useState(false);
-  const [pendingUser, setPendingUser] = useState<User | null>(null);
 
   useEffect(() => {
     // Set up auth state listener
@@ -39,68 +35,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          console.log('User session found, checking if OAuth user...');
-          // Check if this is a new OAuth user without a profile
-          const isOAuthUser = session.user.app_metadata?.provider && 
-                             session.user.app_metadata.provider !== 'email';
-          
-          console.log('Is OAuth user:', isOAuthUser, 'Provider:', session.user.app_metadata?.provider);
-          
-          if (isOAuthUser) {
-            // Check if profile exists
-            setTimeout(async () => {
-              try {
-                console.log('Checking for existing profile...');
-                const { data: existingProfile, error } = await supabase
-                  .from('profiles')
-                  .select('*')
-                  .eq('id', session.user.id)
-                  .single();
-
-                console.log('Profile query result:', { existingProfile, error });
-
-                if (error && error.code !== 'PGRST116') {
-                  console.error('Error checking profile:', error);
-                }
-
-                if (existingProfile) {
-                  console.log('Profile found:', existingProfile);
-                  setProfile(existingProfile);
-                  setLoading(false);
-                } else {
-                  console.log('No profile found, showing role selection dialog');
-                  // New OAuth user - show role selection
-                  setPendingUser(session.user);
-                  setShowRoleDialog(true);
-                  setLoading(false);
-                }
-              } catch (error) {
-                console.error('Error checking profile:', error);
-                // Profile doesn't exist, show role dialog
-                console.log('Profile check failed, showing role selection dialog');
-                setPendingUser(session.user);
-                setShowRoleDialog(true);
-                setLoading(false);
-              }
-            }, 100);
-          } else {
-            // Regular email signup - fetch profile with retry
-            setTimeout(async () => {
-              try {
-                await fetchProfileWithRetry(session.user.id);
-              } catch (error) {
-                console.error('Error fetching profile:', error);
-                if (error.message?.includes('No rows returned')) {
-                  await createProfile(session.user);
-                }
-              }
-            }, 100);
-          }
+          console.log('User session found, fetching profile...');
+          // Fetch profile with retry for all users
+          setTimeout(async () => {
+            try {
+              await fetchProfileWithRetry(session.user.id);
+            } catch (error) {
+              console.error('Error fetching profile:', error);
+              setLoading(false);
+            }
+          }, 100);
         } else {
           console.log('No user session, clearing state');
           setProfile(null);
-          setShowRoleDialog(false);
-          setPendingUser(null);
           setLoading(false);
         }
       }
@@ -152,72 +99,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const createProfile = async (user: User, role?: 'student' | 'teacher') => {
-    try {
-      console.log('Creating profile for user:', user.id, 'with role:', role);
-      console.log('User email:', user.email);
-      console.log('User metadata:', user.user_metadata);
-      
-      const profileData = {
-        id: user.id,
-        email: user.email,
-        full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
-        role: role || user.user_metadata?.role || 'student'
-      };
-
-      console.log('Profile data to insert:', profileData);
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert([profileData])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating profile:', error);
-        console.error('Error details:', error.details);
-        console.error('Error hint:', error.hint);
-        console.error('Error message:', error.message);
-        throw error;
-      }
-
-      console.log('Profile created successfully:', data);
-      setProfile(data);
-
-      // Create initial points for students
-      if (profileData.role === 'student') {
-        console.log('Creating student points...');
-        const { error: pointsError } = await supabase
-          .from('student_points')
-          .insert([{
-            student_id: user.id,
-            points: 0,
-            streak_days: 0
-          }]);
-
-        if (pointsError) {
-          console.error('Error creating student points:', pointsError);
-        } else {
-          console.log('Student points created successfully');
-        }
-      }
-    } catch (error) {
-      console.error('Failed to create profile:', error);
-      setLoading(false);
-    }
-  };
-
-  const completeOAuthSignup = async (role: 'student' | 'teacher') => {
-    if (!pendingUser) return;
-    
-    console.log('Completing OAuth signup with role:', role);
-    setLoading(true);
-    await createProfile(pendingUser, role);
-    setShowRoleDialog(false);
-    setPendingUser(null);
-    setLoading(false);
-  };
-
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -240,23 +121,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
-  const signInWithGoogle = async () => {
-    console.log('Initiating Google OAuth...');
+  const signInWithGoogle = async (role?: 'student' | 'teacher') => {
+    console.log('Initiating Google OAuth with role:', role);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`
+        redirectTo: `${window.location.origin}/`,
+        data: role ? { role } : undefined
       }
     });
     return { error };
   };
 
-  const signInWithGithub = async () => {
-    console.log('Initiating GitHub OAuth...');
+  const signInWithGithub = async (role?: 'student' | 'teacher') => {
+    console.log('Initiating GitHub OAuth with role:', role);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/`
+        redirectTo: `${window.location.origin}/`,
+        data: role ? { role } : undefined
       }
     });
     return { error };
@@ -272,14 +155,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session,
     profile,
     loading,
-    showRoleDialog,
-    pendingUser,
     signIn,
     signUp,
     signInWithGoogle,
     signInWithGithub,
     signOut,
-    completeOAuthSignup,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

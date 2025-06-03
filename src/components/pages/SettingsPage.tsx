@@ -20,8 +20,6 @@ import {
   Monitor,
   Moon,
   Sun,
-  Volume2,
-  VolumeX,
   Eye,
   EyeOff,
   Trash2,
@@ -39,7 +37,6 @@ export const SettingsPage = () => {
   
   // Profile settings
   const [displayName, setDisplayName] = useState(profile?.full_name || '');
-  const [email, setEmail] = useState(user?.email || '');
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -65,7 +62,7 @@ export const SettingsPage = () => {
   };
 
   const handleSaveAllSettings = async () => {
-    // Update theme in context
+    // Update theme in context and settings
     setTheme(settings.theme);
     
     // Save all settings to database
@@ -82,10 +79,10 @@ export const SettingsPage = () => {
 
   if (!user || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <h2 className="text-xl font-semibold mb-2">Settings not available</h2>
-          <p className="text-gray-600 dark:text-gray-400">Please sign in to access settings.</p>
+          <h2 className="text-xl font-semibold mb-2 text-foreground">Settings not available</h2>
+          <p className="text-muted-foreground">Please sign in to access settings.</p>
         </div>
       </div>
     );
@@ -93,22 +90,22 @@ export const SettingsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Loading settings...</p>
+          <p className="mt-2 text-muted-foreground">Loading settings...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Settings</h1>
-          <p className="text-gray-600 dark:text-gray-400">Customize your learning experience</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
+          <p className="text-muted-foreground">Customize your learning experience</p>
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
@@ -139,7 +136,7 @@ export const SettingsPage = () => {
           <TabsContent value="profile">
             <Card>
               <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
+                <CardTitle className="text-foreground">Profile Information</CardTitle>
                 <CardDescription>Manage your account details and preferences</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -158,9 +155,9 @@ export const SettingsPage = () => {
                     <Label htmlFor="email">Email Address</Label>
                     <Input
                       id="email"
-                      value={email}
+                      value={user.email || ''}
                       disabled
-                      className="bg-gray-100 dark:bg-gray-800"
+                      className="bg-muted"
                     />
                   </div>
 
@@ -208,14 +205,14 @@ export const SettingsPage = () => {
           <TabsContent value="notifications">
             <Card>
               <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
+                <CardTitle className="text-foreground">Notification Preferences</CardTitle>
                 <CardDescription>Choose what notifications you want to receive</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Email Notifications</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Receive updates via email</p>
+                    <Label className="text-base text-foreground">Email Notifications</Label>
+                    <p className="text-sm text-muted-foreground">Receive updates via email</p>
                   </div>
                   <Switch 
                     checked={settings.email_notifications} 
@@ -227,8 +224,8 @@ export const SettingsPage = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Push Notifications</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Browser notifications for important updates</p>
+                    <Label className="text-base text-foreground">Push Notifications</Label>
+                    <p className="text-sm text-muted-foreground">Browser notifications for important updates</p>
                   </div>
                   <Switch 
                     checked={settings.push_notifications} 
@@ -240,8 +237,8 @@ export const SettingsPage = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Lesson Reminders</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Daily reminders to complete lessons</p>
+                    <Label className="text-base text-foreground">Lesson Reminders</Label>
+                    <p className="text-sm text-muted-foreground">Daily reminders to complete lessons</p>
                   </div>
                   <Switch 
                     checked={settings.lesson_reminders} 
@@ -253,8 +250,8 @@ export const SettingsPage = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Achievement Notifications</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Get notified when you earn badges or complete milestones</p>
+                    <Label className="text-base text-foreground">Achievement Notifications</Label>
+                    <p className="text-sm text-muted-foreground">Get notified when you earn badges or complete milestones</p>
                   </div>
                   <Switch 
                     checked={settings.achievement_notifications} 
@@ -269,7 +266,7 @@ export const SettingsPage = () => {
           <TabsContent value="appearance">
             <Card>
               <CardHeader>
-                <CardTitle>Appearance & Display</CardTitle>
+                <CardTitle className="text-foreground">Appearance & Display</CardTitle>
                 <CardDescription>Customize how the app looks and feels</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -344,7 +341,7 @@ export const SettingsPage = () => {
           <TabsContent value="privacy">
             <Card>
               <CardHeader>
-                <CardTitle>Privacy & Security</CardTitle>
+                <CardTitle className="text-foreground">Privacy & Security</CardTitle>
                 <CardDescription>Control your privacy and data sharing preferences</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -381,8 +378,8 @@ export const SettingsPage = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Show Learning Progress</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Allow others to see your learning progress</p>
+                    <Label className="text-base text-foreground">Show Learning Progress</Label>
+                    <p className="text-sm text-muted-foreground">Allow others to see your learning progress</p>
                   </div>
                   <Switch 
                     checked={settings.show_progress} 
@@ -394,8 +391,8 @@ export const SettingsPage = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Analytics & Performance</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Help improve the app by sharing anonymous usage data</p>
+                    <Label className="text-base text-foreground">Analytics & Performance</Label>
+                    <p className="text-sm text-muted-foreground">Help improve the app by sharing anonymous usage data</p>
                   </div>
                   <Switch 
                     checked={settings.allow_analytics} 
@@ -406,7 +403,7 @@ export const SettingsPage = () => {
                 <Separator />
 
                 <div className="space-y-4">
-                  <Label className="text-base">Data Management</Label>
+                  <Label className="text-base text-foreground">Data Management</Label>
                   <div className="flex gap-2">
                     <Button variant="outline" onClick={handleExportData}>
                       <Download size={16} className="mr-2" />
@@ -426,14 +423,14 @@ export const SettingsPage = () => {
           <TabsContent value="learning">
             <Card>
               <CardHeader>
-                <CardTitle>Learning Preferences</CardTitle>
+                <CardTitle className="text-foreground">Learning Preferences</CardTitle>
                 <CardDescription>Customize your learning experience</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Sound Effects</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Play sounds for interactions and achievements</p>
+                    <Label className="text-base text-foreground">Sound Effects</Label>
+                    <p className="text-sm text-muted-foreground">Play sounds for interactions and achievements</p>
                   </div>
                   <Switch 
                     checked={settings.sound_effects} 
@@ -445,8 +442,8 @@ export const SettingsPage = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label className="text-base">Auto-play Videos</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Automatically play lesson videos</p>
+                    <Label className="text-base text-foreground">Auto-play Videos</Label>
+                    <p className="text-sm text-muted-foreground">Automatically play lesson videos</p>
                   </div>
                   <Switch 
                     checked={settings.autoplay} 
@@ -470,26 +467,6 @@ export const SettingsPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
-
-                {profile.role === 'student' && (
-                  <>
-                    <Separator />
-                    <div className="space-y-2">
-                      <Label>Learning Style Preference</Label>
-                      <Select defaultValue={profile.learning_style || 'visual'}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select learning style" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="visual">Visual</SelectItem>
-                          <SelectItem value="auditory">Auditory</SelectItem>
-                          <SelectItem value="reading">Reading/Writing</SelectItem>
-                          <SelectItem value="kinesthetic">Kinesthetic</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
-                )}
               </CardContent>
             </Card>
           </TabsContent>

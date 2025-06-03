@@ -85,7 +85,7 @@ export const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center space-x-3 mb-2">
@@ -94,7 +94,7 @@ export const AuthPage = () => {
             </div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Welcome to EduAI</CardTitle>
           </div>
-          <CardDescription className="text-gray-600">
+          <CardDescription className="text-muted-foreground">
             Your AI-powered math learning companion
           </CardDescription>
         </CardHeader>
@@ -182,7 +182,7 @@ export const AuthPage = () => {
             <div className="space-y-3">
               <Button
                 variant="outline"
-                className="w-full border-2 border-gradient-to-r from-blue-600 to-purple-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50"
+                className="w-full border-2 border-gradient-to-r from-blue-600 to-purple-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950 dark:hover:to-purple-950"
                 onClick={() => handleOAuthClick('google')}
                 disabled={loading}
               >
@@ -191,7 +191,7 @@ export const AuthPage = () => {
               </Button>
               <Button
                 variant="outline"
-                className="w-full border-2 border-gradient-to-r from-blue-600 to-purple-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50"
+                className="w-full border-2 border-gradient-to-r from-blue-600 to-purple-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 dark:hover:from-blue-950 dark:hover:to-purple-950"
                 onClick={() => handleOAuthClick('github')}
                 disabled={loading}
               >

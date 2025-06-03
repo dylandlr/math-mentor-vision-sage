@@ -1,83 +1,118 @@
 
-import { BookOpen, User, Settings, LogOut } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { useTheme } from '@/contexts/ThemeContext';
+import { BookOpen, Sun, Moon, Monitor, User, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
 
 interface NavbarProps {
   userRole: 'student' | 'teacher';
   userName: string;
-  onNavigate?: (path: string) => void;
+  onNavigate: (path: string) => void;
 }
 
 export const Navbar = ({ userRole, userName, onNavigate }: NavbarProps) => {
-  const { signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const { signOut, profile } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
 
   const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error('Error signing out');
-    } else {
-      toast.success('Signed out successfully');
+    setSigningOut(true);
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    } finally {
+      setSigningOut(false);
     }
   };
 
-  const handleProfileClick = () => {
-    if (onNavigate) {
-      onNavigate('/profile');
-    }
-  };
-
-  const handleSettingsClick = () => {
-    if (onNavigate) {
-      onNavigate('/settings');
+  const getThemeIcon = () => {
+    switch (theme) {
+      case 'light': return <Sun size={16} />;
+      case 'dark': return <Moon size={16} />;
+      default: return <Monitor size={16} />;
     }
   };
 
   return (
-    <nav className="border-b bg-background/80 backdrop-blur-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 rounded-lg">
-              <BookOpen size={24} />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              EduAI
-            </span>
+    <nav className="bg-background border-b border-border px-6 py-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 rounded-lg">
+            <BookOpen size={24} />
           </div>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            EduAI
+          </h1>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          {/* Theme Toggle */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm">
+                {getThemeIcon()}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme('light')}>
+                <Sun className="mr-2 h-4 w-4" />
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('dark')}>
+                <Moon className="mr-2 h-4 w-4" />
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('system')}>
+                <Monitor className="mr-2 h-4 w-4" />
+                System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                  {userName.charAt(0).toUpperCase()}
-                </div>
-                <span className="hidden sm:block text-foreground">{userName}</span>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.profile_picture_url} />
+                  <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm">
+                    {userName?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={handleProfileClick}>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <div className="flex items-center justify-start gap-2 p-2">
+                <div className="flex flex-col space-y-1 leading-none">
+                  <p className="font-medium text-foreground">{userName}</p>
+                  <p className="w-[200px] truncate text-sm text-muted-foreground capitalize">
+                    {userRole}
+                  </p>
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onNavigate('/profile')}>
                 <User className="mr-2 h-4 w-4" />
-                Profile
+                <span>Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleSettingsClick}>
+              <DropdownMenuItem onClick={() => onNavigate('/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
-                Settings
+                <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600 dark:text-red-400" onClick={handleSignOut}>
+              <DropdownMenuItem onClick={handleSignOut} disabled={signingOut}>
                 <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                <span>{signingOut ? 'Signing out...' : 'Sign out'}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

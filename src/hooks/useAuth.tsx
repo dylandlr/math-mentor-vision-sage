@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -96,7 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Check for role in localStorage (fallback)
         const pendingRole = localStorage.getItem('pending_oauth_role');
-        const roleToUse = pendingRole || 'student'; // Default to student if no role found
+        const roleToUse = (pendingRole as 'student' | 'teacher') || 'student'; // Cast to proper type
         
         // Clean up localStorage
         if (pendingRole) {
@@ -109,7 +108,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
           .insert({
-            id: user.id,
             email: user.email || '',
             full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
             role: roleToUse

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent } from '@/components/ui/card';
 import { GraduationCap, Users } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface RoleSelectionDialogProps {
   isOpen: boolean;
@@ -14,9 +16,54 @@ interface RoleSelectionDialogProps {
 
 export const RoleSelectionDialog = ({ isOpen, onRoleSelect, userEmail }: RoleSelectionDialogProps) => {
   const [selectedRole, setSelectedRole] = useState<'student' | 'teacher'>('student');
+  const [loading, setLoading] = useState(false);
 
-  const handleConfirm = () => {
-    onRoleSelect(selectedRole);
+  const handleConfirm = async () => {
+    setLoading(true);
+    
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('No user found');
+        return;
+      }
+
+      // Create profile for the user
+      const { error: createError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: user.email || '',
+          full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
+          role: selectedRole
+        });
+
+      if (createError) {
+        console.error('Error creating profile:', createError);
+        toast.error('Failed to create profile');
+        return;
+      }
+
+      // Create initial points record for students
+      if (selectedRole === 'student') {
+        await supabase
+          .from('student_points')
+          .insert({
+            student_id: user.id,
+            points: 0,
+            streak_days: 0
+          });
+      }
+
+      toast.success('Profile created successfully!');
+      onRoleSelect(selectedRole);
+    } catch (error) {
+      console.error('Error in role selection:', error);
+      toast.error('Something went wrong');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,9 +126,10 @@ export const RoleSelectionDialog = ({ isOpen, onRoleSelect, userEmail }: RoleSel
           
           <Button 
             onClick={handleConfirm}
+            disabled={loading}
             className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
           >
-            Continue as {selectedRole === 'student' ? 'Student' : 'Teacher'}
+            {loading ? 'Setting up...' : `Continue as ${selectedRole === 'student' ? 'Student' : 'Teacher'}`}
           </Button>
         </div>
       </DialogContent>

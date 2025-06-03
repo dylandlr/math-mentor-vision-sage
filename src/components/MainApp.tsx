@@ -6,9 +6,10 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { StudentDashboard } from '@/components/dashboard/StudentDashboard';
 import { TeacherDashboard } from '@/components/dashboard/TeacherDashboard';
 import { AIMentorBubble } from '@/components/layout/AIMentorBubble';
+import { RoleSelectionDialog } from '@/components/auth/RoleSelectionDialog';
 
 export const MainApp = () => {
-  const { profile } = useAuth();
+  const { user, profile, loading } = useAuth();
   const [currentPath, setCurrentPath] = useState('/dashboard');
 
   const handleNavigate = (path: string) => {
@@ -19,11 +20,40 @@ export const MainApp = () => {
     setCurrentPath('/mentor');
   };
 
-  // Show loading if profile is not yet loaded
-  if (!profile) {
+  const handleRoleSelect = () => {
+    // After role selection, the profile will be automatically updated via auth state change
+    // The component will re-render with the new profile
+    window.location.reload();
+  };
+
+  // Show loading if still loading
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Show role selection if user exists but no profile
+  if (user && !profile) {
+    return (
+      <RoleSelectionDialog
+        isOpen={true}
+        onRoleSelect={handleRoleSelect}
+        userEmail={user.email || 'User'}
+      />
+    );
+  }
+
+  // If no profile, something went wrong
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
+          <p className="text-gray-600">Unable to load your profile. Please try refreshing the page.</p>
+        </div>
       </div>
     );
   }

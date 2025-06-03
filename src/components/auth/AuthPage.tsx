@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Github, Mail } from 'lucide-react';
+import { Github, Mail, BookOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { PreOAuthRoleDialog } from './PreOAuthRoleDialog';
 import { toast } from 'sonner';
@@ -88,7 +88,12 @@ export const AuthPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Welcome to EduAI</CardTitle>
+          <div className="flex items-center justify-center space-x-3 mb-2">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 rounded-lg">
+              <BookOpen size={24} />
+            </div>
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Welcome to EduAI</CardTitle>
+          </div>
           <CardDescription className="text-gray-600">
             Your AI-powered math learning companion
           </CardDescription>

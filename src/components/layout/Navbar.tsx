@@ -35,6 +35,12 @@ export const Navbar = ({ userRole, userName, onNavigate }: NavbarProps) => {
     }
   };
 
+  const handleSettingsClick = () => {
+    if (onNavigate) {
+      onNavigate('/settings');
+    }
+  };
+
   return (
     <nav className="border-b bg-white/80 backdrop-blur-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,7 +70,7 @@ export const Navbar = ({ userRole, userName, onNavigate }: NavbarProps) => {
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSettingsClick}>
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </DropdownMenuItem>

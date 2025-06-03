@@ -13,6 +13,7 @@ import { PracticePage } from '@/components/pages/PracticePage';
 import { CoursePage } from '@/components/pages/CoursePage';
 import { TeacherContentGenerator } from '@/components/pages/TeacherContentGenerator';
 import { ProfilePage } from '@/components/pages/ProfilePage';
+import { SettingsPage } from '@/components/pages/SettingsPage';
 
 export const MainApp = () => {
   const { user, profile, loading } = useAuth();
@@ -78,9 +79,13 @@ export const MainApp = () => {
   const userName = profile.full_name || profile.email || 'User';
 
   const renderContent = () => {
-    // Handle profile page for both roles
+    // Handle profile and settings pages for both roles
     if (currentPath === '/profile') {
       return <ProfilePage />;
+    }
+    
+    if (currentPath === '/settings') {
+      return <SettingsPage />;
     }
 
     if (userRole === 'student') {

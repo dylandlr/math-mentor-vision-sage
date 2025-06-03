@@ -74,7 +74,6 @@ export const AuthPage = () => {
           <div className="mx-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-xl w-fit">
             <div className="text-2xl font-bold">EduAI</div>
           </div>
-          <script src="https://accounts.google.com/gsi/client" async></script>
           <CardTitle className="text-2xl font-bold">Welcome to EduAI</CardTitle>
           <p className="text-gray-600">Your AI-powered learning companion</p>
         </CardHeader>

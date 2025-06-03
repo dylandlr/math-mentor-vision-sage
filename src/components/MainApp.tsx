@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navbar } from '@/components/layout/Navbar';
@@ -11,6 +12,7 @@ import { LessonsPage } from '@/components/pages/LessonsPage';
 import { AchievementsPage } from '@/components/pages/AchievementsPage';
 import { PracticePage } from '@/components/pages/PracticePage';
 import { CoursePage } from '@/components/pages/CoursePage';
+import { TeacherContentGenerator } from '@/components/pages/TeacherContentGenerator';
 
 export const MainApp = () => {
   const { user, profile, loading } = useAuth();
@@ -99,7 +101,7 @@ export const MainApp = () => {
         case '/teacher':
           return <TeacherDashboard />;
         case '/teacher/courses':
-          return <div className="p-6">Courses management coming soon...</div>;
+          return <TeacherContentGenerator />;
         case '/teacher/students':
           return <div className="p-6">Student management coming soon...</div>;
         case '/teacher/analytics':

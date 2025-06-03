@@ -10,7 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Brain,
-  Play
+  Play,
+  Wand2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -35,7 +36,7 @@ export const Sidebar = ({ userRole, currentPath, onNavigate }: SidebarProps) => 
 
   const teacherItems = [
     { icon: Home, label: 'Dashboard', path: '/teacher' },
-    { icon: BookOpen, label: 'Courses', path: '/teacher/courses' },
+    { icon: Wand2, label: 'AI Content', path: '/teacher/courses' },
     { icon: Users, label: 'Students', path: '/teacher/students' },
     { icon: BarChart3, label: 'Analytics', path: '/teacher/analytics' },
     { icon: MessageCircle, label: 'Messages', path: '/teacher/messages' },

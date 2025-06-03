@@ -88,7 +88,7 @@ export const AuthPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">Welcome to EduAI</CardTitle>
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Welcome to EduAI</CardTitle>
           <CardDescription className="text-gray-600">
             Your AI-powered math learning companion
           </CardDescription>

@@ -13,6 +13,10 @@ import { AchievementsPage } from '@/components/pages/AchievementsPage';
 import { PracticePage } from '@/components/pages/PracticePage';
 import { CoursePage } from '@/components/pages/CoursePage';
 import { TeacherContentGenerator } from '@/components/pages/TeacherContentGenerator';
+import { TeacherLessons } from '@/components/pages/TeacherLessons';
+import { StudentManagement } from '@/components/pages/StudentManagement';
+import { AnalyticsPage } from '@/components/pages/AnalyticsPage';
+import { MessagingPage } from '@/components/pages/MessagingPage';
 import { ProfilePage } from '@/components/pages/ProfilePage';
 import { SettingsPage } from '@/components/pages/SettingsPage';
 
@@ -113,12 +117,14 @@ export const MainApp = () => {
           return <TeacherDashboard />;
         case '/teacher/courses':
           return <TeacherContentGenerator />;
+        case '/teacher/lessons':
+          return <TeacherLessons />;
         case '/teacher/students':
-          return <div className="p-6 text-foreground">Student management coming soon...</div>;
+          return <StudentManagement />;
         case '/teacher/analytics':
-          return <div className="p-6 text-foreground">Analytics page coming soon...</div>;
+          return <AnalyticsPage />;
         case '/teacher/messages':
-          return <div className="p-6 text-foreground">Messages page coming soon...</div>;
+          return <MessagingPage />;
         default:
           return <TeacherDashboard />;
       }

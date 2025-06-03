@@ -15,16 +15,16 @@ export const StudentDashboard = () => {
     return (
       <div className="max-w-7xl mx-auto p-6">
         <div className="animate-pulse space-y-6">
-          <div className="h-32 bg-gray-200 rounded-xl"></div>
+          <div className="h-32 bg-muted rounded-xl"></div>
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+                <div key={i} className="h-32 bg-muted rounded-lg"></div>
               ))}
             </div>
             <div className="space-y-6">
-              <div className="h-48 bg-gray-200 rounded-lg"></div>
-              <div className="h-64 bg-gray-200 rounded-lg"></div>
+              <div className="h-48 bg-muted rounded-lg"></div>
+              <div className="h-64 bg-muted rounded-lg"></div>
             </div>
           </div>
         </div>
@@ -64,26 +64,26 @@ export const StudentDashboard = () => {
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Current Courses */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-2xl font-bold text-gray-800">Continue Learning</h2>
+          <h2 className="text-2xl font-bold text-foreground">Continue Learning</h2>
           {courses.length > 0 ? (
             courses.map((course) => (
               <Card key={course.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold">{course.title}</h3>
-                      <p className="text-gray-600">{course.description}</p>
+                      <h3 className="text-lg font-semibold text-foreground">{course.title}</h3>
+                      <p className="text-muted-foreground">{course.description}</p>
                     </div>
                     <span className={cn(
-                      "px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700"
+                      "px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
                     )}>
                       Grade {course.grade_level}
                     </span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Progress</span>
-                      <span>0%</span>
+                      <span className="text-muted-foreground">Progress</span>
+                      <span className="text-foreground">0%</span>
                     </div>
                     <Progress value={0} className="h-2" />
                   </div>
@@ -96,9 +96,9 @@ export const StudentDashboard = () => {
           ) : (
             <Card>
               <CardContent className="p-6 text-center">
-                <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No courses yet</h3>
-                <p className="text-gray-600 mb-4">Contact your teacher to get enrolled in courses</p>
+                <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2 text-foreground">No courses yet</h3>
+                <p className="text-muted-foreground mb-4">Contact your teacher to get enrolled in courses</p>
                 <Button variant="outline">
                   Browse Available Courses
                 </Button>
@@ -118,7 +118,7 @@ export const StudentDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <p className="text-sm text-gray-600">Get instant help with your math questions</p>
+              <p className="text-sm text-muted-foreground">Get instant help with your math questions</p>
               <Button variant="outline" className="w-full">
                 <MessageCircle size={16} className="mr-2" />
                 Ask AI Mentor
@@ -137,16 +137,16 @@ export const StudentDashboard = () => {
                   <div key={index} className="flex items-center space-x-3">
                     <div className="text-2xl">{achievement.icon}</div>
                     <div>
-                      <p className="font-medium text-sm">{achievement.title}</p>
-                      <p className="text-xs text-gray-500">{achievement.description}</p>
+                      <p className="font-medium text-sm text-foreground">{achievement.title}</p>
+                      <p className="text-xs text-muted-foreground">{achievement.description}</p>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-4">
-                  <Trophy className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600">No achievements yet</p>
-                  <p className="text-xs text-gray-500">Start learning to earn your first achievement!</p>
+                  <Trophy className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">No achievements yet</p>
+                  <p className="text-xs text-muted-foreground">Start learning to earn your first achievement!</p>
                 </div>
               )}
               <Button variant="outline" className="w-full mt-3">
@@ -157,13 +157,13 @@ export const StudentDashboard = () => {
           </Card>
 
           {/* Study Reminder */}
-          <Card className="bg-gradient-to-br from-orange-50 to-yellow-50 border-orange-200">
+          <Card className="bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-950/50 dark:to-yellow-950/50 border-orange-200 dark:border-orange-800">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2 mb-2">
                 <Clock className="text-orange-500" size={16} />
-                <span className="font-medium text-orange-700">Study Reminder</span>
+                <span className="font-medium text-orange-700 dark:text-orange-300">Study Reminder</span>
               </div>
-              <p className="text-sm text-orange-600">Keep your learning streak going!</p>
+              <p className="text-sm text-orange-600 dark:text-orange-400">Keep your learning streak going!</p>
               <Button size="sm" className="w-full mt-3 bg-orange-500 hover:bg-orange-600">
                 <Play size={14} className="mr-2" />
                 Start Learning

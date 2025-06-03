@@ -83,20 +83,20 @@ export const PracticePage = () => {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'quick': return 'bg-green-100 text-green-800';
-      case 'practice': return 'bg-blue-100 text-blue-800';
-      case 'test': return 'bg-purple-100 text-purple-800';
-      case 'challenge': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'quick': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'practice': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'test': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      case 'challenge': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'hard': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'easy': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+      case 'hard': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
 
@@ -112,7 +112,7 @@ export const PracticePage = () => {
   const totalPoints = 1250;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto bg-background min-h-screen">
       <div className="mb-6">
         <div className="flex items-center space-x-3 mb-4">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 rounded-lg">
@@ -129,7 +129,7 @@ export const PracticePage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-blue-600">{weeklyProgress}%</div>
-                  <div className="text-sm text-gray-600">Weekly Goal</div>
+                  <div className="text-sm text-muted-foreground">Weekly Goal</div>
                 </div>
                 <TrendingUp className="h-8 w-8 text-blue-600" />
               </div>
@@ -142,7 +142,7 @@ export const PracticePage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-orange-600">{streakDays}</div>
-                  <div className="text-sm text-gray-600">Day Streak</div>
+                  <div className="text-sm text-muted-foreground">Day Streak</div>
                 </div>
                 <Zap className="h-8 w-8 text-orange-600" />
               </div>
@@ -154,7 +154,7 @@ export const PracticePage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-2xl font-bold text-purple-600">{totalPoints}</div>
-                  <div className="text-sm text-gray-600">Total Points</div>
+                  <div className="text-sm text-muted-foreground">Total Points</div>
                 </div>
                 <Target className="h-8 w-8 text-purple-600" />
               </div>
@@ -173,7 +173,7 @@ export const PracticePage = () => {
                     {getTypeIcon(session.type)}
                   </div>
                   <div>
-                    <CardTitle className="text-lg">{session.title}</CardTitle>
+                    <CardTitle className="text-lg text-foreground">{session.title}</CardTitle>
                     <div className="flex items-center space-x-2 mt-1">
                       <Badge className={getTypeColor(session.type)}>
                         {session.type}
@@ -188,26 +188,26 @@ export const PracticePage = () => {
             </CardHeader>
             
             <CardContent>
-              <p className="text-gray-600 mb-4">{session.description}</p>
+              <p className="text-muted-foreground mb-4">{session.description}</p>
               
               <div className="space-y-2 mb-4">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Topic:</span>
-                  <span className="font-medium">{session.topic}</span>
+                  <span className="text-muted-foreground">Topic:</span>
+                  <span className="font-medium text-foreground">{session.topic}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Duration:</span>
-                  <div className="flex items-center">
+                  <span className="text-muted-foreground">Duration:</span>
+                  <div className="flex items-center text-foreground">
                     <Clock size={14} className="mr-1" />
                     {session.duration} min
                   </div>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Questions:</span>
-                  <span className="font-medium">{session.questions}</span>
+                  <span className="text-muted-foreground">Questions:</span>
+                  <span className="font-medium text-foreground">{session.questions}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Potential Points:</span>
+                  <span className="text-muted-foreground">Potential Points:</span>
                   <span className="font-medium text-green-600">+{session.estimatedPoints}</span>
                 </div>
               </div>

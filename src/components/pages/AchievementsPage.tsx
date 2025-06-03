@@ -91,11 +91,11 @@ export const AchievementsPage = () => {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'learning': return 'bg-blue-100 text-blue-800';
-      case 'practice': return 'bg-green-100 text-green-800';
-      case 'streak': return 'bg-orange-100 text-orange-800';
-      case 'special': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'learning': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'practice': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'streak': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
+      case 'special': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
 
@@ -106,7 +106,7 @@ export const AchievementsPage = () => {
   const unlockedCount = achievements.filter(a => a.isUnlocked).length;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto bg-background min-h-screen">
       <div className="mb-6">
         <div className="flex items-center space-x-3 mb-4">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 rounded-lg">
@@ -121,19 +121,19 @@ export const AchievementsPage = () => {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="text-3xl font-bold text-blue-600 mb-2">{totalPoints}</div>
-              <div className="text-sm text-gray-600">Total Points</div>
+              <div className="text-sm text-muted-foreground">Total Points</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <div className="text-3xl font-bold text-green-600 mb-2">{unlockedCount}</div>
-              <div className="text-sm text-gray-600">Unlocked</div>
+              <div className="text-sm text-muted-foreground">Unlocked</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
               <div className="text-3xl font-bold text-purple-600 mb-2">{achievements.length}</div>
-              <div className="text-sm text-gray-600">Total Available</div>
+              <div className="text-sm text-muted-foreground">Total Available</div>
             </CardContent>
           </Card>
         </div>
@@ -154,7 +154,7 @@ export const AchievementsPage = () => {
                 <div className="flex items-center space-x-3">
                   <div className="text-3xl">{achievement.icon}</div>
                   <div>
-                    <CardTitle className="text-lg">{achievement.title}</CardTitle>
+                    <CardTitle className="text-lg text-foreground">{achievement.title}</CardTitle>
                     <Badge className={getCategoryColor(achievement.category)}>
                       {achievement.category}
                     </Badge>
@@ -163,21 +163,21 @@ export const AchievementsPage = () => {
                 {achievement.isUnlocked ? (
                   <CheckCircle className="text-green-500 h-6 w-6" />
                 ) : (
-                  <Lock className="text-gray-400 h-6 w-6" />
+                  <Lock className="text-muted-foreground h-6 w-6" />
                 )}
               </div>
             </CardHeader>
             
             <CardContent>
-              <p className="text-gray-600 mb-4">{achievement.description}</p>
+              <p className="text-muted-foreground mb-4">{achievement.description}</p>
               
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-1">
                   <Star className="h-4 w-4 text-yellow-500" />
-                  <span className="text-sm font-medium">{achievement.points} points</span>
+                  <span className="text-sm font-medium text-foreground">{achievement.points} points</span>
                 </div>
                 {achievement.unlockedAt && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-muted-foreground">
                     Unlocked {achievement.unlockedAt.toLocaleDateString()}
                   </span>
                 )}
@@ -186,8 +186,8 @@ export const AchievementsPage = () => {
               {!achievement.isUnlocked && achievement.progress !== undefined && achievement.maxProgress && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Progress</span>
-                    <span className="text-sm font-medium">
+                    <span className="text-sm text-muted-foreground">Progress</span>
+                    <span className="text-sm font-medium text-foreground">
                       {achievement.progress}/{achievement.maxProgress}
                     </span>
                   </div>

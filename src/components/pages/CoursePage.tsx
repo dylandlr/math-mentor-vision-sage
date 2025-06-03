@@ -91,10 +91,10 @@ export const CoursePage = () => {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'bg-green-100 text-green-800';
-      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
-      case 'advanced': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'beginner': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'intermediate': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+      case 'advanced': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
 
@@ -111,12 +111,12 @@ export const CoursePage = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto bg-background min-h-screen">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Courses</h1>
-            <p className="text-gray-600">Track your progress and continue learning</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">My Courses</h1>
+            <p className="text-muted-foreground">Track your progress and continue learning</p>
           </div>
           <Button 
             onClick={handleEnrollInNewCourse}
@@ -128,7 +128,7 @@ export const CoursePage = () => {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
+        <div className="flex space-x-1 bg-muted p-1 rounded-lg w-fit">
           {[
             { key: 'all', label: 'All Courses' },
             { key: 'in-progress', label: 'In Progress' },
@@ -139,8 +139,8 @@ export const CoursePage = () => {
               onClick={() => setSelectedFilter(filter.key as any)}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 selectedFilter === filter.key
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-background text-blue-600 dark:text-blue-400 shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {filter.label}
@@ -156,8 +156,8 @@ export const CoursePage = () => {
             <div className="flex items-center space-x-2">
               <BookOpen className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm text-gray-600">Total Courses</p>
-                <p className="text-2xl font-bold">{mockCourses.length}</p>
+                <p className="text-sm text-muted-foreground">Total Courses</p>
+                <p className="text-2xl font-bold text-foreground">{mockCourses.length}</p>
               </div>
             </div>
           </CardContent>
@@ -168,8 +168,8 @@ export const CoursePage = () => {
             <div className="flex items-center space-x-2">
               <Play className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm text-gray-600">In Progress</p>
-                <p className="text-2xl font-bold">
+                <p className="text-sm text-muted-foreground">In Progress</p>
+                <p className="text-2xl font-bold text-foreground">
                   {mockCourses.filter(c => c.progress > 0 && c.progress < 100).length}
                 </p>
               </div>
@@ -182,8 +182,8 @@ export const CoursePage = () => {
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-5 w-5 text-purple-600" />
               <div>
-                <p className="text-sm text-gray-600">Completed</p>
-                <p className="text-2xl font-bold">
+                <p className="text-sm text-muted-foreground">Completed</p>
+                <p className="text-2xl font-bold text-foreground">
                   {mockCourses.filter(c => c.progress === 100).length}
                 </p>
               </div>
@@ -196,8 +196,8 @@ export const CoursePage = () => {
             <div className="flex items-center space-x-2">
               <Trophy className="h-5 w-5 text-yellow-600" />
               <div>
-                <p className="text-sm text-gray-600">Avg. Progress</p>
-                <p className="text-2xl font-bold">
+                <p className="text-sm text-muted-foreground">Avg. Progress</p>
+                <p className="text-2xl font-bold text-foreground">
                   {Math.round(mockCourses.reduce((acc, c) => acc + c.progress, 0) / mockCourses.length)}%
                 </p>
               </div>
@@ -213,15 +213,15 @@ export const CoursePage = () => {
             <CardHeader>
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
-                  <CardTitle className="text-xl mb-2">{course.title}</CardTitle>
-                  <p className="text-gray-600 text-sm mb-3">{course.description}</p>
+                  <CardTitle className="text-xl mb-2 text-foreground">{course.title}</CardTitle>
+                  <p className="text-muted-foreground text-sm mb-3">{course.description}</p>
                 </div>
                 <Badge className={getDifficultyColor(course.difficulty)}>
                   {course.difficulty}
                 </Badge>
               </div>
               
-              <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+              <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-4">
                 <div className="flex items-center space-x-1">
                   <Users className="h-4 w-4" />
                   <span>{course.enrolledStudents.toLocaleString()}</span>
@@ -238,22 +238,22 @@ export const CoursePage = () => {
 
               <div className="mb-4">
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-gray-600">Progress</span>
-                  <span className="font-medium">
+                  <span className="text-muted-foreground">Progress</span>
+                  <span className="font-medium text-foreground">
                     {course.completedLessons}/{course.totalLessons} lessons
                   </span>
                 </div>
                 <Progress value={course.progress} className="h-2" />
-                <p className="text-xs text-gray-500 mt-1">{course.progress}% complete</p>
+                <p className="text-xs text-muted-foreground mt-1">{course.progress}% complete</p>
               </div>
             </CardHeader>
 
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  <p className="font-medium">Instructor: {course.instructor}</p>
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium text-foreground">Instructor: {course.instructor}</p>
                   {course.nextLesson && (
-                    <p className="text-blue-600 mt-1">Next: {course.nextLesson}</p>
+                    <p className="text-blue-600 dark:text-blue-400 mt-1">Next: {course.nextLesson}</p>
                   )}
                 </div>
                 
@@ -272,9 +272,9 @@ export const CoursePage = () => {
 
       {filteredCourses.length === 0 && (
         <div className="text-center py-12">
-          <BookOpen className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
-          <p className="text-gray-600 mb-4">
+          <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">No courses found</h3>
+          <p className="text-muted-foreground mb-4">
             {selectedFilter === 'all' 
               ? "You haven't enrolled in any courses yet."
               : `No ${selectedFilter.replace('-', ' ')} courses found.`

@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,7 +30,7 @@ export const MentorPage = () => {
   }, [messages]);
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto bg-background min-h-screen">
       <div className="mb-6">
         <div className="flex items-center space-x-3 mb-2">
           <div className={cn(
@@ -52,15 +53,15 @@ export const MentorPage = () => {
             </div>
           </div>
         </div>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           Get personalized help with math concepts, homework, and problem-solving
           {isOffline && " (Limited offline mode active)"}
         </p>
       </div>
 
-      <Card className="h-[600px] flex flex-col">
-        <CardHeader className="border-b">
-          <CardTitle className="flex items-center space-x-2">
+      <Card className="h-[600px] flex flex-col bg-card border-border">
+        <CardHeader className="border-b border-border bg-card">
+          <CardTitle className="flex items-center space-x-2 text-card-foreground">
             {isOffline ? <WifiOff size={20} className="text-orange-600" /> : <Bot size={20} />}
             <span>Chat with your AI Mentor</span>
             {isOffline && (
@@ -69,8 +70,8 @@ export const MentorPage = () => {
           </CardTitle>
         </CardHeader>
         
-        <CardContent className="flex-1 p-0">
-          <ScrollArea className="h-[480px] p-4" ref={scrollAreaRef}>
+        <CardContent className="flex-1 p-0 bg-card">
+          <ScrollArea className="h-[480px] p-4 bg-card" ref={scrollAreaRef}>
             <div className="space-y-4">
               {messages.map((message) => (
                 <div
@@ -83,15 +84,15 @@ export const MentorPage = () => {
                       message.isUser
                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
                         : message.isOffline
-                          ? 'bg-orange-50 text-gray-900 border border-orange-200'
-                          : 'bg-gray-100 text-gray-900'
+                          ? 'bg-orange-50 dark:bg-orange-900/20 text-foreground border border-orange-200 dark:border-orange-700'
+                          : 'bg-muted text-muted-foreground'
                     )}
                   >
                     <div className="flex items-start space-x-2">
                       {!message.isUser && (
                         message.isOffline ? 
                           <WifiOff size={16} className="mt-1 text-orange-500" /> :
-                          <Bot size={16} className="mt-1 text-gray-500" />
+                          <Bot size={16} className="mt-1 text-muted-foreground" />
                       )}
                       {message.isUser && <User size={16} className="mt-1 text-white" />}
                       <div>
@@ -99,12 +100,12 @@ export const MentorPage = () => {
                         <div className="flex items-center space-x-2 mt-1">
                           <span className={`text-xs ${
                             message.isUser ? 'text-blue-100' : 
-                            message.isOffline ? 'text-orange-600' : 'text-gray-500'
+                            message.isOffline ? 'text-orange-600 dark:text-orange-400' : 'text-muted-foreground'
                           }`}>
                             {message.timestamp.toLocaleTimeString()}
                           </span>
                           {message.isOffline && (
-                            <span className="text-xs text-orange-600">• Offline</span>
+                            <span className="text-xs text-orange-600 dark:text-orange-400">• Offline</span>
                           )}
                         </div>
                       </div>
@@ -117,17 +118,17 @@ export const MentorPage = () => {
                 <div className="flex justify-start">
                   <div className={cn(
                     "p-3 rounded-lg",
-                    isOffline ? "bg-orange-50 border border-orange-200" : "bg-gray-100"
+                    isOffline ? "bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700" : "bg-muted"
                   )}>
                     <div className="flex items-center space-x-2">
                       {isOffline ? 
                         <WifiOff size={16} className="text-orange-500" /> :
-                        <Bot size={16} className="text-gray-500" />
+                        <Bot size={16} className="text-muted-foreground" />
                       }
                       <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                       </div>
                     </div>
                   </div>
@@ -136,7 +137,7 @@ export const MentorPage = () => {
             </div>
           </ScrollArea>
           
-          <div className="border-t p-4">
+          <div className="border-t border-border p-4 bg-card">
             <div className="flex space-x-2">
               <Input
                 value={inputMessage}
@@ -144,7 +145,7 @@ export const MentorPage = () => {
                 placeholder={isOffline ? "AI reconnecting... Messages still work!" : "Ask me anything about math..."}
                 onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                 disabled={isTyping}
-                className="flex-1"
+                className="flex-1 bg-background border-border text-foreground placeholder:text-muted-foreground"
               />
               <Button 
                 onClick={handleSendMessage}
@@ -160,7 +161,7 @@ export const MentorPage = () => {
               </Button>
             </div>
             {isOffline && (
-              <p className="text-xs text-orange-600 mt-2 text-center">
+              <p className="text-xs text-orange-600 dark:text-orange-400 mt-2 text-center">
                 AI service temporarily unavailable - fallback responses active
               </p>
             )}

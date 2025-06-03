@@ -35,13 +35,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          console.log('User session found, fetching profile...');
-          // Fetch profile with retry for all users
+          console.log('User session found, checking for profile...');
+          // For OAuth users, check if profile exists, if not create it
           setTimeout(async () => {
             try {
-              await fetchProfileWithRetry(session.user.id);
+              await handleUserProfile(session.user);
             } catch (error) {
-              console.error('Error fetching profile:', error);
+              console.error('Error handling user profile:', error);
               setLoading(false);
             }
           }, 100);
@@ -66,36 +66,82 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfileWithRetry = async (userId: string, retries = 3): Promise<void> => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        console.log(`Fetching profile for user ${userId}, attempt ${i + 1}`);
-        const { data: profileData, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
+  const handleUserProfile = async (user: User) => {
+    try {
+      console.log(`Checking profile for user ${user.id}`);
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-        if (error) {
-          console.error('Profile fetch error:', error);
-          if (i === retries - 1) throw error;
-          // Wait before retry
-          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-          continue;
-        }
-
-        console.log('Profile fetched successfully:', profileData);
-        setProfile(profileData);
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('Error fetching profile:', fetchError);
         setLoading(false);
         return;
-      } catch (error) {
-        console.error(`Profile fetch attempt ${i + 1} failed:`, error);
-        if (i === retries - 1) {
-          setLoading(false);
-          throw error;
-        }
-        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
       }
+
+      if (existingProfile) {
+        console.log('Profile exists:', existingProfile);
+        setProfile(existingProfile);
+        setLoading(false);
+        return;
+      }
+
+      // Profile doesn't exist - check if this is an OAuth user who needs role selection
+      const isOAuthUser = user.app_metadata?.provider && user.app_metadata.provider !== 'email';
+      
+      if (isOAuthUser) {
+        console.log('OAuth user without profile, checking for pending role...');
+        
+        // Check for role in localStorage (fallback)
+        const pendingRole = localStorage.getItem('pending_oauth_role');
+        const roleToUse = pendingRole || 'student'; // Default to student if no role found
+        
+        // Clean up localStorage
+        if (pendingRole) {
+          localStorage.removeItem('pending_oauth_role');
+        }
+
+        console.log('Creating profile for OAuth user with role:', roleToUse);
+        
+        // Create profile for OAuth user
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: user.email || '',
+            full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
+            role: roleToUse
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating OAuth profile:', createError);
+          setLoading(false);
+          return;
+        }
+
+        // Create initial points record for students
+        if (roleToUse === 'student') {
+          await supabase
+            .from('student_points')
+            .insert({
+              student_id: user.id,
+              points: 0,
+              streak_days: 0
+            });
+        }
+
+        console.log('OAuth profile created successfully:', newProfile);
+        setProfile(newProfile);
+      }
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error in handleUserProfile:', error);
+      setLoading(false);
     }
   };
 

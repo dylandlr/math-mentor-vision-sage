@@ -119,6 +119,126 @@ export type Database = {
           },
         ]
       }
+      generated_lessons: {
+        Row: {
+          content: Json
+          created_at: string
+          description: string | null
+          difficulty_level: Database["public"]["Enums"]["difficulty_level"]
+          estimated_duration: number | null
+          grade_level: number
+          id: string
+          is_published: boolean | null
+          learning_style: Database["public"]["Enums"]["learning_style"] | null
+          points_value: number | null
+          subject: string
+          teacher_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          description?: string | null
+          difficulty_level: Database["public"]["Enums"]["difficulty_level"]
+          estimated_duration?: number | null
+          grade_level: number
+          id?: string
+          is_published?: boolean | null
+          learning_style?: Database["public"]["Enums"]["learning_style"] | null
+          points_value?: number | null
+          subject: string
+          teacher_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          difficulty_level?: Database["public"]["Enums"]["difficulty_level"]
+          estimated_duration?: number | null
+          grade_level?: number
+          id?: string
+          is_published?: boolean | null
+          learning_style?: Database["public"]["Enums"]["learning_style"] | null
+          points_value?: number | null
+          subject?: string
+          teacher_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_lessons_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          completed_at: string | null
+          due_date: string | null
+          id: string
+          is_completed: boolean | null
+          lesson_id: string
+          score: number | null
+          student_id: string
+          time_spent: number | null
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          completed_at?: string | null
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean | null
+          lesson_id: string
+          score?: number | null
+          student_id: string
+          time_spent?: number | null
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          completed_at?: string | null
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean | null
+          lesson_id?: string
+          score?: number | null
+          student_id?: string
+          time_spent?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_assignments_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "generated_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_assignments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed: boolean | null

@@ -6,9 +6,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, Wand2, BarChart3, Video, BookOpen, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Brain, Wand2, BarChart3, Video, BookOpen, Loader2, Gamepad2 } from 'lucide-react';
 import { useAISystems } from '@/hooks/useAISystems';
 import { ContentGenerationRequest } from '@/services/contentService';
+import { LessonBuilder } from './LessonBuilder';
 
 export const TeacherContentGenerator = () => {
   const [contentType, setContentType] = useState<'lesson' | 'quiz' | 'practice' | 'project'>('lesson');
@@ -21,6 +23,7 @@ export const TeacherContentGenerator = () => {
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [videoPrompt, setVideoPrompt] = useState('');
   const [videoType, setVideoType] = useState<'explanation' | 'example' | 'exercise'>('explanation');
+  const [showLessonBuilder, setShowLessonBuilder] = useState(false);
 
   const { loading, generateContent, generateVideo, checkSystemStatus, systemStatus } = useAISystems();
 
@@ -54,6 +57,10 @@ export const TeacherContentGenerator = () => {
     } catch (error) {
       console.error('Video generation failed:', error);
     }
+  };
+
+  const handleCreateLesson = () => {
+    setShowLessonBuilder(true);
   };
 
   return (
@@ -204,11 +211,22 @@ export const TeacherContentGenerator = () => {
           {generatedContent && (
             <Card>
               <CardHeader>
-                <CardTitle>Generated {generatedContent.type} Content</CardTitle>
-                <div className="flex flex-wrap gap-2">
-                  <Badge>{generatedContent.difficulty}</Badge>
-                  <Badge variant="outline">{generatedContent.learningStyle}</Badge>
-                  <Badge variant="outline">Grade {generatedContent.gradeLevel}</Badge>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Generated {generatedContent.type} Content</CardTitle>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge>{generatedContent.difficulty}</Badge>
+                      <Badge variant="outline">{generatedContent.learningStyle}</Badge>
+                      <Badge variant="outline">Grade {generatedContent.gradeLevel}</Badge>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={handleCreateLesson}
+                    className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                  >
+                    <Gamepad2 className="mr-2 h-4 w-4" />
+                    Create Lesson
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -315,6 +333,19 @@ export const TeacherContentGenerator = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Lesson Builder Dialog */}
+      <Dialog open={showLessonBuilder} onOpenChange={setShowLessonBuilder}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create Gamified Lesson</DialogTitle>
+          </DialogHeader>
+          <LessonBuilder 
+            generatedContent={generatedContent}
+            onClose={() => setShowLessonBuilder(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

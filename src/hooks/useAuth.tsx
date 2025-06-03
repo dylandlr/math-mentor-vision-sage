@@ -27,21 +27,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile
+          // Fetch user profile with retry logic for new users
           setTimeout(async () => {
             try {
-              const { data: profileData } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-              setProfile(profileData);
+              await fetchProfileWithRetry(session.user.id);
             } catch (error) {
               console.error('Error fetching profile:', error);
+              // If profile doesn't exist, create it
+              if (error.message?.includes('No rows returned')) {
+                await createProfile(session.user);
+              }
             }
           }, 0);
         } else {
@@ -62,6 +62,78 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchProfileWithRetry = async (userId: string, retries = 3): Promise<void> => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        console.log(`Fetching profile for user ${userId}, attempt ${i + 1}`);
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (error) {
+          console.error('Profile fetch error:', error);
+          if (i === retries - 1) throw error;
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+          continue;
+        }
+
+        console.log('Profile fetched successfully:', profileData);
+        setProfile(profileData);
+        return;
+      } catch (error) {
+        console.error(`Profile fetch attempt ${i + 1} failed:`, error);
+        if (i === retries - 1) throw error;
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      }
+    }
+  };
+
+  const createProfile = async (user: User) => {
+    try {
+      console.log('Creating profile for user:', user.id);
+      const profileData = {
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email,
+        role: user.user_metadata?.role || 'student'
+      };
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert([profileData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating profile:', error);
+        throw error;
+      }
+
+      console.log('Profile created successfully:', data);
+      setProfile(data);
+
+      // Create initial points for students
+      if (profileData.role === 'student') {
+        const { error: pointsError } = await supabase
+          .from('student_points')
+          .insert([{
+            student_id: user.id,
+            points: 0,
+            streak_days: 0
+          }]);
+
+        if (pointsError) {
+          console.error('Error creating student points:', pointsError);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to create profile:', error);
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({

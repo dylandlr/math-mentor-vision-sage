@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Github, Mail, BookOpen } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Github, Mail, BookOpen, GraduationCap, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { PreOAuthRoleDialog } from './PreOAuthRoleDialog';
 import { toast } from 'sonner';
@@ -16,6 +17,7 @@ export const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [selectedRole, setSelectedRole] = useState<'student' | 'teacher'>('student');
   const [loading, setLoading] = useState(false);
   const [showOAuthDialog, setShowOAuthDialog] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<'google' | 'github'>('google');
@@ -47,7 +49,7 @@ export const AuthPage = () => {
     setLoading(true);
     
     try {
-      const { error } = await signUp(email, password);
+      const { error } = await signUp(email, password, { role: selectedRole });
       if (error) {
         toast.error(error.message);
       } else {
@@ -170,6 +172,46 @@ export const AuthPage = () => {
                     required
                   />
                 </div>
+                
+                <div className="space-y-3">
+                  <Label>I am a:</Label>
+                  <RadioGroup value={selectedRole} onValueChange={(value) => setSelectedRole(value as 'student' | 'teacher')}>
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="student" id="role-student" />
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-full">
+                          <GraduationCap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <label htmlFor="role-student" className="font-medium cursor-pointer">
+                            Student
+                          </label>
+                          <p className="text-sm text-muted-foreground">
+                            Learn math with AI-powered lessons
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <RadioGroupItem value="teacher" id="role-teacher" />
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-purple-100 dark:bg-purple-900 p-2 rounded-full">
+                          <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div>
+                          <label htmlFor="role-teacher" className="font-medium cursor-pointer">
+                            Teacher
+                          </label>
+                          <p className="text-sm text-muted-foreground">
+                            Create courses and track progress
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </RadioGroup>
+                </div>
+
                 <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" disabled={loading}>
                   {loading ? 'Creating account...' : 'Create Account'}
                 </Button>

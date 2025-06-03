@@ -231,6 +231,7 @@ export type Database = {
           profile_picture_url: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string | null
+          username: string | null
         }
         Insert: {
           created_at?: string | null
@@ -242,6 +243,7 @@ export type Database = {
           profile_picture_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
+          username?: string | null
         }
         Update: {
           created_at?: string | null
@@ -253,6 +255,7 @@ export type Database = {
           profile_picture_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
+          username?: string | null
         }
         Relationships: []
       }

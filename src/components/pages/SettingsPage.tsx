@@ -37,9 +37,16 @@ export const SettingsPage = () => {
   
   // Profile settings
   const [displayName, setDisplayName] = useState(profile?.full_name || '');
+  const [username, setUsername] = useState(profile?.username || '');
 
   const handleSaveProfile = async () => {
     if (!user) return;
+    
+    // Validate username format
+    if (username && !/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+      toast.error('Username must be 3-20 characters long and contain only letters, numbers, and underscores');
+      return;
+    }
     
     setProfileLoading(true);
     try {
@@ -47,12 +54,20 @@ export const SettingsPage = () => {
         .from('profiles')
         .update({
           full_name: displayName,
+          username: username || null,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
 
-      if (error) throw error;
-      toast.success('Profile settings saved successfully!');
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast.error('Username is already taken. Please choose a different one.');
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success('Profile settings saved successfully!');
+      }
     } catch (error) {
       console.error('Error saving profile:', error);
       toast.error('Failed to save profile settings');
@@ -149,6 +164,20 @@ export const SettingsPage = () => {
                       onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="Enter your display name"
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Choose a unique username"
+                      className={username && !/^[a-zA-Z0-9_]{3,20}$/.test(username) ? 'border-red-500' : ''}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      3-20 characters, letters, numbers, and underscores only
+                    </p>
                   </div>
                   
                   <div className="space-y-2">

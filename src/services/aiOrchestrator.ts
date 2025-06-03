@@ -1,5 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { contentService, ContentGenerationRequest } from './contentService';
+import { analyticsService } from './analyticsService';
 
 export interface AISystemStatus {
   sage: 'online' | 'offline' | 'busy';
@@ -7,16 +9,6 @@ export interface AISystemStatus {
   insight: 'online' | 'offline' | 'busy';
   adapt: 'online' | 'offline' | 'busy';
   vision: 'online' | 'offline' | 'busy';
-}
-
-export interface ContentGenerationRequest {
-  type: 'lesson' | 'quiz' | 'practice' | 'project';
-  subject: string;
-  gradeLevel: number;
-  topic: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  learningStyle?: 'visual' | 'auditory' | 'reading' | 'kinesthetic';
-  duration?: number;
 }
 
 export interface AdaptiveRecommendation {
@@ -37,81 +29,112 @@ export class AIOrchestrator {
   };
 
   async getSystemStatus(): Promise<AISystemStatus> {
+    // Check each AI system's health
+    try {
+      // Test SAGE (Content Generation)
+      await supabase.functions.invoke('ai-content-generator', { 
+        body: { type: 'test', subject: 'test', gradeLevel: 1, topic: 'test', difficulty: 'beginner' } 
+      });
+      this.systemStatus.sage = 'online';
+    } catch {
+      this.systemStatus.sage = 'offline';
+    }
+
+    try {
+      // Test MENTOR (Chat)
+      await supabase.functions.invoke('ai-mentor-chat', { 
+        body: { message: 'test', chatHistory: [] } 
+      });
+      this.systemStatus.mentor = 'online';
+    } catch {
+      this.systemStatus.mentor = 'offline';
+    }
+
+    try {
+      // Test INSIGHT (Analytics)
+      await supabase.functions.invoke('ai-analytics', { 
+        body: { userId: 'test', timeframe: '7d' } 
+      });
+      this.systemStatus.insight = 'online';
+    } catch {
+      this.systemStatus.insight = 'offline';
+    }
+
+    try {
+      // Test ADAPT (Adaptive Learning)
+      await supabase.functions.invoke('ai-adaptive-learning', { 
+        body: { userId: 'test' } 
+      });
+      this.systemStatus.adapt = 'online';
+    } catch {
+      this.systemStatus.adapt = 'offline';
+    }
+
+    try {
+      // Test VISION (Video Generation)
+      await supabase.functions.invoke('ai-video-generator', { 
+        body: { prompt: 'test', type: 'explanation' } 
+      });
+      this.systemStatus.vision = 'online';
+    } catch {
+      this.systemStatus.vision = 'offline';
+    }
+
     return this.systemStatus;
   }
 
   async generateContent(request: ContentGenerationRequest): Promise<any> {
+    this.systemStatus.sage = 'busy';
     try {
-      this.systemStatus.sage = 'busy';
-      
-      const { data, error } = await supabase.functions.invoke('ai-content-generator', {
-        body: request
-      });
-
-      if (error) throw error;
-      
+      const result = await contentService.generateContent(request);
       this.systemStatus.sage = 'online';
-      return data;
+      return result;
     } catch (error) {
       this.systemStatus.sage = 'offline';
-      console.error('Content generation failed:', error);
       throw error;
     }
   }
 
   async getAnalytics(userId: string, timeframe: string = '30d'): Promise<any> {
+    this.systemStatus.insight = 'busy';
     try {
-      this.systemStatus.insight = 'busy';
-      
-      const { data, error } = await supabase.functions.invoke('ai-analytics', {
-        body: { userId, timeframe }
-      });
-
-      if (error) throw error;
-      
+      const result = await analyticsService.generateAnalytics(userId, timeframe);
       this.systemStatus.insight = 'online';
-      return data;
+      return result;
     } catch (error) {
       this.systemStatus.insight = 'offline';
-      console.error('Analytics generation failed:', error);
       throw error;
     }
   }
 
   async getAdaptiveRecommendations(userId: string): Promise<AdaptiveRecommendation> {
+    this.systemStatus.adapt = 'busy';
     try {
-      this.systemStatus.adapt = 'busy';
-      
-      const { data, error } = await supabase.functions.invoke('ai-adaptive-learning', {
-        body: { userId }
-      });
-
-      if (error) throw error;
-      
+      const result = await analyticsService.getAdaptiveRecommendations(userId);
       this.systemStatus.adapt = 'online';
-      return data;
+      
+      // Transform the response to match the expected interface
+      return {
+        userId: result.userId,
+        recommendedContent: result.recommendations.nextTopics,
+        learningGaps: result.recommendations.remediationAreas,
+        nextTopics: result.recommendations.nextTopics,
+        difficultyAdjustment: result.recommendations.difficultyAdjustment,
+      };
     } catch (error) {
       this.systemStatus.adapt = 'offline';
-      console.error('Adaptive learning failed:', error);
       throw error;
     }
   }
 
   async generateVideo(prompt: string, type: 'explanation' | 'example' | 'exercise'): Promise<any> {
+    this.systemStatus.vision = 'busy';
     try {
-      this.systemStatus.vision = 'busy';
-      
-      const { data, error } = await supabase.functions.invoke('ai-video-generator', {
-        body: { prompt, type }
-      });
-
-      if (error) throw error;
-      
+      const result = await contentService.generateVideo({ prompt, type });
       this.systemStatus.vision = 'online';
-      return data;
+      return result;
     } catch (error) {
       this.systemStatus.vision = 'offline';
-      console.error('Video generation failed:', error);
       throw error;
     }
   }

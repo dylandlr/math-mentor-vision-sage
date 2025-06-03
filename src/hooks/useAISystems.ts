@@ -1,6 +1,8 @@
 
 import { useState } from 'react';
-import { aiOrchestrator, ContentGenerationRequest, AISystemStatus } from '@/services/aiOrchestrator';
+import { contentService, ContentGenerationRequest, VideoGenerationRequest } from '@/services/contentService';
+import { analyticsService } from '@/services/analyticsService';
+import { aiOrchestrator, AISystemStatus } from '@/services/aiOrchestrator';
 import { useToast } from '@/hooks/use-toast';
 
 export const useAISystems = () => {
@@ -11,7 +13,7 @@ export const useAISystems = () => {
   const generateContent = async (request: ContentGenerationRequest) => {
     setLoading(true);
     try {
-      const content = await aiOrchestrator.generateContent(request);
+      const content = await contentService.generateContent(request);
       toast({
         title: "Content Generated",
         description: `${request.type} content for ${request.topic} has been created successfully.`,
@@ -32,7 +34,7 @@ export const useAISystems = () => {
   const getAnalytics = async (userId: string, timeframe: string = '30d') => {
     setLoading(true);
     try {
-      const analytics = await aiOrchestrator.getAnalytics(userId, timeframe);
+      const analytics = await analyticsService.generateAnalytics(userId, timeframe);
       return analytics;
     } catch (error) {
       toast({
@@ -49,7 +51,7 @@ export const useAISystems = () => {
   const getAdaptiveRecommendations = async (userId: string) => {
     setLoading(true);
     try {
-      const recommendations = await aiOrchestrator.getAdaptiveRecommendations(userId);
+      const recommendations = await analyticsService.getAdaptiveRecommendations(userId);
       return recommendations;
     } catch (error) {
       toast({
@@ -66,7 +68,7 @@ export const useAISystems = () => {
   const generateVideo = async (prompt: string, type: 'explanation' | 'example' | 'exercise') => {
     setLoading(true);
     try {
-      const video = await aiOrchestrator.generateVideo(prompt, type);
+      const video = await contentService.generateVideo({ prompt, type });
       toast({
         title: "Video Generation Started",
         description: "Your educational video is being generated. This may take a few minutes.",

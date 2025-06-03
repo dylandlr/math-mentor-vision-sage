@@ -8,6 +8,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface NavbarProps {
   userRole: 'student' | 'teacher';
@@ -15,6 +17,17 @@ interface NavbarProps {
 }
 
 export const Navbar = ({ userRole, userName }: NavbarProps) => {
+  const { signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error('Error signing out');
+    } else {
+      toast.success('Signed out successfully');
+    }
+  };
+
   return (
     <nav className="border-b bg-white/80 backdrop-blur-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,7 +62,7 @@ export const Navbar = ({ userRole, userName }: NavbarProps) => {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem className="text-red-600" onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </DropdownMenuItem>

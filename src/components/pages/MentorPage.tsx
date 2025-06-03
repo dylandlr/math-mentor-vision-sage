@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Brain, Send, User, Bot } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   id: string;
@@ -25,14 +27,10 @@ export const MentorPage = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-  // TODO: Integrate with OpenAI API or similar AI service for actual chat responses
-  // TODO: Connect to user's lesson progress and learning history for personalized responses
-  // TODO: Store chat history in database for persistence across sessions
-  // TODO: Implement context awareness based on current lesson or subject
+  const { toast } = useToast();
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || isTyping) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -45,17 +43,46 @@ export const MentorPage = () => {
     setInputMessage('');
     setIsTyping(true);
 
-    // TODO: Replace with actual AI API call
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-mentor-chat', {
+        body: {
+          message: inputMessage,
+          chatHistory: messages.slice(-10) // Send last 10 messages for context
+        }
+      });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: "I understand you're asking about that topic. Let me help you break it down step by step. (This is a placeholder response - TODO: Implement actual AI integration)",
+        content: data.response || "I'm sorry, I couldn't process your request right now. Please try again.",
         isUser: false,
         timestamp: new Date()
       };
+
       setMessages(prev => [...prev, aiResponse]);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      toast({
+        title: "Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive"
+      });
+
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment.",
+        isUser: false,
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   useEffect(() => {
@@ -107,7 +134,7 @@ export const MentorPage = () => {
                       {!message.isUser && <Bot size={16} className="mt-1 text-gray-500" />}
                       {message.isUser && <User size={16} className="mt-1 text-white" />}
                       <div>
-                        <p className="text-sm">{message.content}</p>
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                         <span className={`text-xs ${message.isUser ? 'text-blue-100' : 'text-gray-500'} mt-1 block`}>
                           {message.timestamp.toLocaleTimeString()}
                         </span>
@@ -140,8 +167,9 @@ export const MentorPage = () => {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Ask me anything about math..."
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                 disabled={isTyping}
+                className="flex-1"
               />
               <Button 
                 onClick={handleSendMessage}

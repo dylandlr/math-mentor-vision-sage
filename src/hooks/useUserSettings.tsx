@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -42,6 +43,7 @@ const defaultSettings: UserSettings = {
 
 export const useUserSettings = () => {
   const { user } = useAuth();
+  const { theme: contextTheme } = useTheme();
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -51,6 +53,11 @@ export const useUserSettings = () => {
       fetchSettings();
     }
   }, [user]);
+
+  // Sync theme from context to settings when it changes
+  useEffect(() => {
+    setSettings(prev => ({ ...prev, theme: contextTheme }));
+  }, [contextTheme]);
 
   const fetchSettings = async () => {
     if (!user) return;
@@ -101,7 +108,8 @@ export const useUserSettings = () => {
         .from('user_settings')
         .upsert({
           user_id: user.id,
-          ...newSettings
+          ...newSettings,
+          updated_at: new Date().toISOString()
         });
 
       if (error) throw error;

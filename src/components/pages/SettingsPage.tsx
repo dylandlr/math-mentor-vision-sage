@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -31,7 +30,7 @@ import { toast } from 'sonner';
 
 export const SettingsPage = () => {
   const { user, profile } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   const { settings, loading, saving, updateSetting, saveSettings } = useUserSettings();
   const [profileLoading, setProfileLoading] = useState(false);
   
@@ -77,10 +76,7 @@ export const SettingsPage = () => {
   };
 
   const handleSaveAllSettings = async () => {
-    // First update the theme in context immediately
-    setTheme(settings.theme);
-    
-    // Then save all settings to database
+    // Save all settings to database
     await saveSettings(settings);
   };
 
@@ -304,9 +300,10 @@ export const SettingsPage = () => {
                   <Select 
                     value={settings.theme} 
                     onValueChange={(value) => {
-                      updateSetting('theme', value as 'light' | 'dark' | 'system');
-                      // Apply theme immediately for better UX
-                      setTheme(value as 'light' | 'dark' | 'system');
+                      const newTheme = value as 'light' | 'dark' | 'system';
+                      updateSetting('theme', newTheme);
+                      // Apply theme immediately through context
+                      setTheme(newTheme);
                     }}
                   >
                     <SelectTrigger>

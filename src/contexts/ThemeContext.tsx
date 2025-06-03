@@ -86,15 +86,18 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     
-    // Save theme to database if user is logged in
+    // Save theme to database and update user_settings table if user is logged in
     if (user) {
       try {
         await supabase
           .from('user_settings')
           .upsert({
             user_id: user.id,
-            theme: newTheme
+            theme: newTheme,
+            updated_at: new Date().toISOString()
           });
+        
+        console.log('Theme saved to database:', newTheme);
       } catch (error) {
         console.error('Error saving theme to database:', error);
       }

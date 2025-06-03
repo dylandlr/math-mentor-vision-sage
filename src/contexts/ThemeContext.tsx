@@ -82,9 +82,23 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [theme]);
 
-  const handleSetTheme = (newTheme: Theme) => {
+  const handleSetTheme = async (newTheme: Theme) => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
+    
+    // Save theme to database if user is logged in
+    if (user) {
+      try {
+        await supabase
+          .from('user_settings')
+          .upsert({
+            user_id: user.id,
+            theme: newTheme
+          });
+      } catch (error) {
+        console.error('Error saving theme to database:', error);
+      }
+    }
   };
 
   return (

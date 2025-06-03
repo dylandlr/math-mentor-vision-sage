@@ -77,10 +77,10 @@ export const SettingsPage = () => {
   };
 
   const handleSaveAllSettings = async () => {
-    // Update theme in context and settings
+    // First update the theme in context immediately
     setTheme(settings.theme);
     
-    // Save all settings to database
+    // Then save all settings to database
     await saveSettings(settings);
   };
 
@@ -301,7 +301,14 @@ export const SettingsPage = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label>Theme</Label>
-                  <Select value={settings.theme} onValueChange={(value) => updateSetting('theme', value as 'light' | 'dark' | 'system')}>
+                  <Select 
+                    value={settings.theme} 
+                    onValueChange={(value) => {
+                      updateSetting('theme', value as 'light' | 'dark' | 'system');
+                      // Apply theme immediately for better UX
+                      setTheme(value as 'light' | 'dark' | 'system');
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

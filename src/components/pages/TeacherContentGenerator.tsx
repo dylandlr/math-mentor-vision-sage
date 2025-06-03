@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Brain, Wand2, BarChart3, Video, BookOpen, Loader2 } from 'lucide-react';
 import { useAISystems } from '@/hooks/useAISystems';
-import { ContentGenerationRequest } from '@/services/aiOrchestrator';
+import { ContentGenerationRequest } from '@/services/contentService';
 
 export const TeacherContentGenerator = () => {
   const [contentType, setContentType] = useState<'lesson' | 'quiz' | 'practice' | 'project'>('lesson');

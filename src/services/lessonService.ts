@@ -52,9 +52,21 @@ export interface AssignLessonRequest {
 
 export const lessonService = {
   async createLesson(request: CreateLessonRequest): Promise<GeneratedLesson> {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    // Create the lesson object with teacher_id
+    const lessonData = {
+      ...request,
+      teacher_id: user.id
+    };
+
     const { data, error } = await supabase
       .from('generated_lessons')
-      .insert([request])
+      .insert(lessonData)
       .select()
       .single();
 
@@ -94,9 +106,16 @@ export const lessonService = {
   },
 
   async assignLesson(request: AssignLessonRequest): Promise<void> {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
     const assignments = request.student_ids.map(student_id => ({
       lesson_id: request.lesson_id,
       student_id,
+      assigned_by: user.id,
       due_date: request.due_date,
     }));
 

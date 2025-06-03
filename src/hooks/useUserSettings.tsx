@@ -56,8 +56,20 @@ export const useUserSettings = () => {
 
   // Sync theme from context to settings when it changes
   useEffect(() => {
+    console.log('UserSettings: Syncing theme from context:', contextTheme);
     setSettings(prev => ({ ...prev, theme: contextTheme }));
   }, [contextTheme]);
+
+  // Listen for theme changes from navbar
+  useEffect(() => {
+    const handleThemeChange = (event: CustomEvent) => {
+      console.log('UserSettings: Received theme change event:', event.detail.theme);
+      setSettings(prev => ({ ...prev, theme: event.detail.theme }));
+    };
+
+    window.addEventListener('themeChanged', handleThemeChange as EventListener);
+    return () => window.removeEventListener('themeChanged', handleThemeChange as EventListener);
+  }, []);
 
   const fetchSettings = async () => {
     if (!user) return;
@@ -73,7 +85,7 @@ export const useUserSettings = () => {
       if (error) throw error;
 
       if (data) {
-        setSettings({
+        const fetchedSettings = {
           theme: data.theme as 'light' | 'dark' | 'system',
           font_size: data.font_size,
           language: data.language,
@@ -89,7 +101,9 @@ export const useUserSettings = () => {
           difficulty_setting: data.difficulty_setting,
           timezone: data.timezone,
           country: data.country
-        });
+        };
+        console.log('UserSettings: Fetched settings from DB:', fetchedSettings);
+        setSettings(fetchedSettings);
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -104,6 +118,7 @@ export const useUserSettings = () => {
 
     try {
       setSaving(true);
+      console.log('UserSettings: Saving settings to DB:', newSettings);
       const { error } = await supabase
         .from('user_settings')
         .upsert({
@@ -125,6 +140,7 @@ export const useUserSettings = () => {
   };
 
   const updateSetting = (key: keyof UserSettings, value: any) => {
+    console.log('UserSettings: Updating setting:', key, 'to:', value);
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 

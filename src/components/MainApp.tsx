@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navbar } from '@/components/layout/Navbar';
@@ -13,6 +12,7 @@ import { AchievementsPage } from '@/components/pages/AchievementsPage';
 import { PracticePage } from '@/components/pages/PracticePage';
 import { CoursePage } from '@/components/pages/CoursePage';
 import { TeacherContentGenerator } from '@/components/pages/TeacherContentGenerator';
+import { ProfilePage } from '@/components/pages/ProfilePage';
 
 export const MainApp = () => {
   const { user, profile, loading } = useAuth();
@@ -78,6 +78,11 @@ export const MainApp = () => {
   const userName = profile.full_name || profile.email || 'User';
 
   const renderContent = () => {
+    // Handle profile page for both roles
+    if (currentPath === '/profile') {
+      return <ProfilePage />;
+    }
+
     if (userRole === 'student') {
       switch (currentPath) {
         case '/dashboard':
@@ -116,7 +121,7 @@ export const MainApp = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar userRole={userRole} userName={userName} />
+      <Navbar userRole={userRole} userName={userName} onNavigate={handleNavigate} />
       <div className="flex">
         <Sidebar 
           userRole={userRole} 

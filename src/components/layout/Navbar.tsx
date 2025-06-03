@@ -14,9 +14,10 @@ import { toast } from 'sonner';
 interface NavbarProps {
   userRole: 'student' | 'teacher';
   userName: string;
+  onNavigate?: (path: string) => void;
 }
 
-export const Navbar = ({ userRole, userName }: NavbarProps) => {
+export const Navbar = ({ userRole, userName, onNavigate }: NavbarProps) => {
   const { signOut } = useAuth();
 
   const handleSignOut = async () => {
@@ -25,6 +26,12 @@ export const Navbar = ({ userRole, userName }: NavbarProps) => {
       toast.error('Error signing out');
     } else {
       toast.success('Signed out successfully');
+    }
+  };
+
+  const handleProfileClick = () => {
+    if (onNavigate) {
+      onNavigate('/profile');
     }
   };
 
@@ -53,7 +60,7 @@ export const Navbar = ({ userRole, userName }: NavbarProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleProfileClick}>
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </DropdownMenuItem>

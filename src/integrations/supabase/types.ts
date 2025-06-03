@@ -363,6 +363,72 @@ export type Database = {
           },
         ]
       }
+      user_settings: {
+        Row: {
+          achievement_notifications: boolean | null
+          allow_analytics: boolean | null
+          autoplay: boolean | null
+          country: string | null
+          created_at: string
+          difficulty_setting: string | null
+          email_notifications: boolean | null
+          font_size: string | null
+          id: string
+          language: string | null
+          lesson_reminders: boolean | null
+          profile_visibility: string | null
+          push_notifications: boolean | null
+          show_progress: boolean | null
+          sound_effects: boolean | null
+          theme: string | null
+          timezone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_notifications?: boolean | null
+          allow_analytics?: boolean | null
+          autoplay?: boolean | null
+          country?: string | null
+          created_at?: string
+          difficulty_setting?: string | null
+          email_notifications?: boolean | null
+          font_size?: string | null
+          id?: string
+          language?: string | null
+          lesson_reminders?: boolean | null
+          profile_visibility?: string | null
+          push_notifications?: boolean | null
+          show_progress?: boolean | null
+          sound_effects?: boolean | null
+          theme?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_notifications?: boolean | null
+          allow_analytics?: boolean | null
+          autoplay?: boolean | null
+          country?: string | null
+          created_at?: string
+          difficulty_setting?: string | null
+          email_notifications?: boolean | null
+          font_size?: string | null
+          id?: string
+          language?: string | null
+          lesson_reminders?: boolean | null
+          profile_visibility?: string | null
+          push_notifications?: boolean | null
+          show_progress?: boolean | null
+          sound_effects?: boolean | null
+          theme?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

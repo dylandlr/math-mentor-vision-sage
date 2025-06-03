@@ -1,5 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -20,12 +22,42 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('theme') as Theme;
     return saved || 'system';
   });
 
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
+
+  // Load theme from database when user logs in
+  useEffect(() => {
+    if (user) {
+      loadThemeFromDatabase();
+    }
+  }, [user]);
+
+  const loadThemeFromDatabase = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('theme')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data && data.theme) {
+        const dbTheme = data.theme as Theme;
+        setTheme(dbTheme);
+        localStorage.setItem('theme', dbTheme);
+      }
+    } catch (error) {
+      console.error('Error loading theme from database:', error);
+    }
+  };
 
   useEffect(() => {
     const root = window.document.documentElement;

@@ -1,6 +1,8 @@
+
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useUserSettings } from '@/hooks/useUserSettings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +25,8 @@ import {
   Eye,
   EyeOff,
   Trash2,
-  Download
+  Download,
+  Save
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -31,36 +34,17 @@ import { toast } from 'sonner';
 export const SettingsPage = () => {
   const { user, profile } = useAuth();
   const { theme, setTheme } = useTheme();
-  const [loading, setLoading] = useState(false);
+  const { settings, loading, saving, updateSetting, saveSettings } = useUserSettings();
+  const [profileLoading, setProfileLoading] = useState(false);
   
   // Profile settings
   const [displayName, setDisplayName] = useState(profile?.full_name || '');
   const [email, setEmail] = useState(user?.email || '');
-  
-  // Notification settings
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [lessonReminders, setLessonReminders] = useState(true);
-  const [achievementNotifications, setAchievementNotifications] = useState(true);
-  
-  // Appearance settings
-  const [fontSize, setFontSize] = useState('medium');
-  const [language, setLanguage] = useState('en');
-  
-  // Privacy settings
-  const [profileVisibility, setProfileVisibility] = useState('friends');
-  const [showProgress, setShowProgress] = useState(true);
-  const [allowAnalytics, setAllowAnalytics] = useState(true);
-  
-  // Learning preferences
-  const [soundEffects, setSoundEffects] = useState(true);
-  const [autoplay, setAutoplay] = useState(false);
-  const [difficultySetting, setDifficultySetting] = useState('adaptive');
 
   const handleSaveProfile = async () => {
     if (!user) return;
     
-    setLoading(true);
+    setProfileLoading(true);
     try {
       const { error } = await supabase
         .from('profiles')
@@ -76,12 +60,19 @@ export const SettingsPage = () => {
       console.error('Error saving profile:', error);
       toast.error('Failed to save profile settings');
     } finally {
-      setLoading(false);
+      setProfileLoading(false);
     }
   };
 
+  const handleSaveAllSettings = async () => {
+    // Update theme in context
+    setTheme(settings.theme);
+    
+    // Save all settings to database
+    await saveSettings(settings);
+  };
+
   const handleDeleteAccount = () => {
-    // This would typically show a confirmation dialog
     toast.error('Account deletion requires confirmation');
   };
 
@@ -94,7 +85,18 @@ export const SettingsPage = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-2">Settings not available</h2>
-          <p className="text-gray-600">Please sign in to access settings.</p>
+          <p className="text-gray-600 dark:text-gray-400">Please sign in to access settings.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Loading settings...</p>
         </div>
       </div>
     );
@@ -164,7 +166,7 @@ export const SettingsPage = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="timezone">Timezone</Label>
-                    <Select defaultValue="utc-5">
+                    <Select value={settings.timezone} onValueChange={(value) => updateSetting('timezone', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select timezone" />
                       </SelectTrigger>
@@ -179,7 +181,7 @@ export const SettingsPage = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="country">Country</Label>
-                    <Select defaultValue="us">
+                    <Select value={settings.country} onValueChange={(value) => updateSetting('country', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select country" />
                       </SelectTrigger>
@@ -194,8 +196,8 @@ export const SettingsPage = () => {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button onClick={handleSaveProfile} disabled={loading}>
-                    {loading ? 'Saving...' : 'Save Changes'}
+                  <Button onClick={handleSaveProfile} disabled={profileLoading}>
+                    {profileLoading ? 'Saving...' : 'Save Profile'}
                   </Button>
                 </div>
               </CardContent>
@@ -215,7 +217,10 @@ export const SettingsPage = () => {
                     <Label className="text-base">Email Notifications</Label>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Receive updates via email</p>
                   </div>
-                  <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
+                  <Switch 
+                    checked={settings.email_notifications} 
+                    onCheckedChange={(checked) => updateSetting('email_notifications', checked)} 
+                  />
                 </div>
 
                 <Separator />
@@ -225,7 +230,10 @@ export const SettingsPage = () => {
                     <Label className="text-base">Push Notifications</Label>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Browser notifications for important updates</p>
                   </div>
-                  <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
+                  <Switch 
+                    checked={settings.push_notifications} 
+                    onCheckedChange={(checked) => updateSetting('push_notifications', checked)} 
+                  />
                 </div>
 
                 <Separator />
@@ -235,7 +243,10 @@ export const SettingsPage = () => {
                     <Label className="text-base">Lesson Reminders</Label>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Daily reminders to complete lessons</p>
                   </div>
-                  <Switch checked={lessonReminders} onCheckedChange={setLessonReminders} />
+                  <Switch 
+                    checked={settings.lesson_reminders} 
+                    onCheckedChange={(checked) => updateSetting('lesson_reminders', checked)} 
+                  />
                 </div>
 
                 <Separator />
@@ -245,7 +256,10 @@ export const SettingsPage = () => {
                     <Label className="text-base">Achievement Notifications</Label>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Get notified when you earn badges or complete milestones</p>
                   </div>
-                  <Switch checked={achievementNotifications} onCheckedChange={setAchievementNotifications} />
+                  <Switch 
+                    checked={settings.achievement_notifications} 
+                    onCheckedChange={(checked) => updateSetting('achievement_notifications', checked)} 
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -261,7 +275,7 @@ export const SettingsPage = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label>Theme</Label>
-                  <Select value={theme} onValueChange={setTheme}>
+                  <Select value={settings.theme} onValueChange={(value) => updateSetting('theme', value as 'light' | 'dark' | 'system')}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -290,7 +304,7 @@ export const SettingsPage = () => {
 
                 <div className="space-y-2">
                   <Label>Font Size</Label>
-                  <Select value={fontSize} onValueChange={setFontSize}>
+                  <Select value={settings.font_size} onValueChange={(value) => updateSetting('font_size', value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -305,7 +319,7 @@ export const SettingsPage = () => {
 
                 <div className="space-y-2">
                   <Label>Language</Label>
-                  <Select value={language} onValueChange={setLanguage}>
+                  <Select value={settings.language} onValueChange={(value) => updateSetting('language', value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -336,7 +350,7 @@ export const SettingsPage = () => {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label>Profile Visibility</Label>
-                  <Select value={profileVisibility} onValueChange={setProfileVisibility}>
+                  <Select value={settings.profile_visibility} onValueChange={(value) => updateSetting('profile_visibility', value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -368,9 +382,12 @@ export const SettingsPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label className="text-base">Show Learning Progress</Label>
-                    <p className="text-sm text-gray-500">Allow others to see your learning progress</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Allow others to see your learning progress</p>
                   </div>
-                  <Switch checked={showProgress} onCheckedChange={setShowProgress} />
+                  <Switch 
+                    checked={settings.show_progress} 
+                    onCheckedChange={(checked) => updateSetting('show_progress', checked)} 
+                  />
                 </div>
 
                 <Separator />
@@ -378,9 +395,12 @@ export const SettingsPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label className="text-base">Analytics & Performance</Label>
-                    <p className="text-sm text-gray-500">Help improve the app by sharing anonymous usage data</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Help improve the app by sharing anonymous usage data</p>
                   </div>
-                  <Switch checked={allowAnalytics} onCheckedChange={setAllowAnalytics} />
+                  <Switch 
+                    checked={settings.allow_analytics} 
+                    onCheckedChange={(checked) => updateSetting('allow_analytics', checked)} 
+                  />
                 </div>
 
                 <Separator />
@@ -413,9 +433,12 @@ export const SettingsPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label className="text-base">Sound Effects</Label>
-                    <p className="text-sm text-gray-500">Play sounds for interactions and achievements</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Play sounds for interactions and achievements</p>
                   </div>
-                  <Switch checked={soundEffects} onCheckedChange={setSoundEffects} />
+                  <Switch 
+                    checked={settings.sound_effects} 
+                    onCheckedChange={(checked) => updateSetting('sound_effects', checked)} 
+                  />
                 </div>
 
                 <Separator />
@@ -423,16 +446,19 @@ export const SettingsPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label className="text-base">Auto-play Videos</Label>
-                    <p className="text-sm text-gray-500">Automatically play lesson videos</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Automatically play lesson videos</p>
                   </div>
-                  <Switch checked={autoplay} onCheckedChange={setAutoplay} />
+                  <Switch 
+                    checked={settings.autoplay} 
+                    onCheckedChange={(checked) => updateSetting('autoplay', checked)} 
+                  />
                 </div>
 
                 <Separator />
 
                 <div className="space-y-2">
                   <Label>Difficulty Setting</Label>
-                  <Select value={difficultySetting} onValueChange={setDifficultySetting}>
+                  <Select value={settings.difficulty_setting} onValueChange={(value) => updateSetting('difficulty_setting', value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -468,6 +494,19 @@ export const SettingsPage = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Save All Settings Button */}
+        <div className="flex justify-center">
+          <Button 
+            onClick={handleSaveAllSettings} 
+            disabled={saving}
+            size="lg"
+            className="flex items-center gap-2"
+          >
+            <Save size={16} />
+            {saving ? 'Saving Settings...' : 'Save All Settings'}
+          </Button>
+        </div>
       </div>
     </div>
   );

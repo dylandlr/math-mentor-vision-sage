@@ -1,8 +1,8 @@
-
-import { Trophy, Clock, Target, BookOpen, Brain, Zap } from 'lucide-react';
+import { Trophy, Clock, Target, BookOpen, Brain, Zap, MessageCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export const StudentDashboard = () => {
   const currentCourses = [

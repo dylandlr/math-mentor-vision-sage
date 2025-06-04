@@ -1,6 +1,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -53,11 +54,100 @@ serve(async (req) => {
   }
 
   try {
-    const { type, prompt, moduleId, moduleType } = await req.json();
+    const requestBody = await req.json();
+    const { type, prompt, moduleId, moduleType, moduleCount, topics, preferences } = requestBody;
     const groqApiKey = Deno.env.get('GROQ_API_KEY');
 
     if (!groqApiKey) {
       throw new Error('GROQ_API_KEY not found');
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Handle full course generation
+    if (type === 'course') {
+      const { subject, gradeLevel, topic, difficulty, duration } = requestBody;
+      
+      const courseGenerationPrompt = `Create a comprehensive course outline for:
+      Subject: ${subject}
+      Grade Level: ${gradeLevel}
+      Topic: ${topic}
+      Difficulty: ${difficulty}
+      Total Duration: ${duration} minutes
+      Number of Modules: ${moduleCount}
+      ${topics && topics.length > 0 ? `Specific Topics: ${topics.join(', ')}` : ''}
+      
+      Include module types: ${Object.entries(preferences || {})
+        .filter(([_, include]) => include)
+        .map(([type, _]) => type.replace('include', '').toLowerCase())
+        .join(', ')}
+      
+      Generate a structured course with modules that progressively build knowledge.`;
+
+      const systemPrompt = `You are SAGE, an advanced AI content generation engine for K-12 education. 
+      Create a comprehensive course structure with detailed modules that:
+      - Are age-appropriate and pedagogically sound
+      - Build progressively from basic to advanced concepts
+      - Include varied learning activities and assessments
+      - Align with educational standards for grade ${gradeLevel}
+      
+      Return the response as a JSON object with this structure:
+      {
+        "courseTitle": "Generated course title",
+        "courseDescription": "Course overview",
+        "modules": [
+          {
+            "title": "Module title",
+            "type": "content|quiz|game|video|assessment",
+            "duration": 5,
+            "description": "Module description",
+            "content": {
+              "introduction": "Module introduction",
+              "main_content": "Core learning content",
+              "activities": "Learning activities",
+              "summary": "Key takeaways"
+            }
+          }
+        ]
+      }`;
+
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${groqApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: courseGenerationPrompt }
+          ],
+          max_tokens: 4000,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate course content');
+      }
+
+      const data = await response.json();
+      const courseContent = JSON.parse(data.choices[0].message.content);
+
+      return new Response(JSON.stringify({
+        type: 'course',
+        courseContent,
+        metadata: {
+          generatedAt: new Date().toISOString(),
+          aiSystem: 'SAGE v2.0',
+          moduleCount: courseContent.modules.length
+        }
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Handle SAGE module content generation
@@ -123,7 +213,7 @@ Additional context: ${prompt}`;
     }
 
     // Handle legacy content generation
-    const { subject, gradeLevel, topic, difficulty, learningStyle, duration } = await req.json();
+    const { subject, gradeLevel, topic, difficulty, learningStyle, duration } = requestBody;
     
     const contentTemplates = {
       lesson: {

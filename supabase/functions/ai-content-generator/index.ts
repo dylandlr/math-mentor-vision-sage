@@ -7,23 +7,42 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const contentTemplates = {
-  lesson: {
-    structure: ['introduction', 'concept_explanation', 'examples', 'practice_problems', 'summary'],
+const moduleTemplates = {
+  content: {
     prompts: {
-      introduction: 'Create an engaging introduction for {topic} at grade {gradeLevel} level',
-      concept_explanation: 'Explain the core concepts of {topic} in simple, clear language for {gradeLevel} grade students',
-      examples: 'Provide 3 worked examples for {topic} with step-by-step solutions',
-      practice_problems: 'Create 5 practice problems for {topic} with varying difficulty levels',
-      summary: 'Summarize the key points of {topic} lesson for grade {gradeLevel}'
+      text_content: 'Create educational content about {topic} for {moduleType} module',
+      examples: 'Provide practical examples for {topic}',
+      activities: 'Design interactive activities for {topic}'
     }
   },
   quiz: {
-    structure: ['multiple_choice', 'short_answer', 'problem_solving'],
     prompts: {
-      multiple_choice: 'Create 5 multiple choice questions about {topic} for grade {gradeLevel}',
-      short_answer: 'Create 3 short answer questions about {topic} for grade {gradeLevel}',
-      problem_solving: 'Create 2 problem-solving questions about {topic} for grade {gradeLevel}'
+      questions: 'Create quiz questions about {topic} with multiple choice and short answer formats',
+      explanations: 'Provide detailed explanations for quiz answers about {topic}'
+    }
+  },
+  game: {
+    prompts: {
+      game_mechanics: 'Design educational game mechanics for learning {topic}',
+      challenges: 'Create progressive challenges for {topic} learning game'
+    }
+  },
+  video: {
+    prompts: {
+      script: 'Write a video script explaining {topic} concepts',
+      storyboard: 'Create a storyboard outline for {topic} educational video'
+    }
+  },
+  image: {
+    prompts: {
+      descriptions: 'Generate descriptive text for educational images about {topic}',
+      diagrams: 'Describe visual diagrams that would help explain {topic}'
+    }
+  },
+  assessment: {
+    prompts: {
+      rubric: 'Create an assessment rubric for {topic} understanding',
+      tasks: 'Design assessment tasks that measure {topic} comprehension'
     }
   }
 };
@@ -34,12 +53,90 @@ serve(async (req) => {
   }
 
   try {
-    const { type, subject, gradeLevel, topic, difficulty, learningStyle, duration } = await req.json();
+    const { type, prompt, moduleId, moduleType } = await req.json();
     const groqApiKey = Deno.env.get('GROQ_API_KEY');
 
     if (!groqApiKey) {
       throw new Error('GROQ_API_KEY not found');
     }
+
+    // Handle SAGE module content generation
+    if (type === 'module_content' && moduleType) {
+      const template = moduleTemplates[moduleType as keyof typeof moduleTemplates];
+      if (!template) {
+        throw new Error(`Unsupported module type: ${moduleType}`);
+      }
+
+      const generatedContent: any = {
+        moduleId,
+        moduleType,
+        generatedAt: new Date().toISOString(),
+        aiSystem: 'SAGE v2.0',
+        content: {}
+      };
+
+      // Generate content for each template section
+      for (const [section, sectionPrompt] of Object.entries(template.prompts)) {
+        const enhancedPrompt = `${sectionPrompt.replace('{topic}', prompt).replace('{moduleType}', moduleType)}
+
+Additional context: ${prompt}`;
+
+        const systemPrompt = `You are SAGE, an advanced AI content generation engine for K-12 education. 
+        Create high-quality, engaging educational content that is:
+        - Age-appropriate and pedagogically sound
+        - Interactive and engaging
+        - Aligned with learning objectives
+        - Structured for easy consumption
+        
+        Module Type: ${moduleType}
+        Focus on creating content that fits the specific module type and educational goals.`;
+
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${groqApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: enhancedPrompt }
+            ],
+            max_tokens: 2000,
+            temperature: 0.7,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          generatedContent.content[section] = data.choices[0].message.content;
+        } else {
+          console.error(`Failed to generate ${section}:`, await response.text());
+          generatedContent.content[section] = `Content generation temporarily unavailable for ${section}`;
+        }
+      }
+
+      return new Response(JSON.stringify(generatedContent), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Handle legacy content generation
+    const { subject, gradeLevel, topic, difficulty, learningStyle, duration } = await req.json();
+    
+    const contentTemplates = {
+      lesson: {
+        structure: ['introduction', 'concept_explanation', 'examples', 'practice_problems', 'summary'],
+        prompts: {
+          introduction: 'Create an engaging introduction for {topic} at grade {gradeLevel} level',
+          concept_explanation: 'Explain the core concepts of {topic} in simple, clear language for {gradeLevel} grade students',
+          examples: 'Provide 3 worked examples for {topic} with step-by-step solutions',
+          practice_problems: 'Create 5 practice problems for {topic} with varying difficulty levels',
+          summary: 'Summarize the key points of {topic} lesson for grade {gradeLevel}'
+        }
+      }
+    };
 
     const template = contentTemplates[type as keyof typeof contentTemplates];
     if (!template) {
@@ -99,7 +196,7 @@ serve(async (req) => {
     generatedContent.metadata = {
       generatedAt: new Date().toISOString(),
       estimatedDuration: duration || 30,
-      aiSystem: 'SAGE v1.0'
+      aiSystem: 'SAGE v2.0'
     };
 
     return new Response(JSON.stringify(generatedContent), {

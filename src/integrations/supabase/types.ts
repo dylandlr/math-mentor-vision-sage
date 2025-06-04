@@ -395,6 +395,234 @@ export type Database = {
         }
         Relationships: []
       }
+      sage_course_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string
+          completed_at: string | null
+          course_id: string
+          due_date: string | null
+          id: string
+          is_completed: boolean | null
+          progress: Json | null
+          student_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by: string
+          completed_at?: string | null
+          course_id: string
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean | null
+          progress?: Json | null
+          student_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string
+          completed_at?: string | null
+          course_id?: string
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean | null
+          progress?: Json | null
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_course_assignments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "sage_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sage_courses: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          difficulty_level: Database["public"]["Enums"]["difficulty_level"]
+          estimated_duration: number | null
+          grade_level: number
+          id: string
+          is_published: boolean | null
+          subject: string
+          teacher_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          difficulty_level?: Database["public"]["Enums"]["difficulty_level"]
+          estimated_duration?: number | null
+          grade_level: number
+          id?: string
+          is_published?: boolean | null
+          subject: string
+          teacher_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          difficulty_level?: Database["public"]["Enums"]["difficulty_level"]
+          estimated_duration?: number | null
+          grade_level?: number
+          id?: string
+          is_published?: boolean | null
+          subject?: string
+          teacher_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sage_generated_assets: {
+        Row: {
+          ai_system: string | null
+          asset_data: Json | null
+          asset_type: string
+          asset_url: string | null
+          created_at: string | null
+          generation_prompt: string | null
+          id: string
+          module_id: string
+        }
+        Insert: {
+          ai_system?: string | null
+          asset_data?: Json | null
+          asset_type: string
+          asset_url?: string | null
+          created_at?: string | null
+          generation_prompt?: string | null
+          id?: string
+          module_id: string
+        }
+        Update: {
+          ai_system?: string | null
+          asset_data?: Json | null
+          asset_type?: string
+          asset_url?: string | null
+          created_at?: string | null
+          generation_prompt?: string | null
+          id?: string
+          module_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_generated_assets_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "sage_lesson_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sage_lesson_modules: {
+        Row: {
+          ai_generated_content: Json | null
+          content: Json | null
+          course_id: string
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          is_hidden: boolean | null
+          module_type: Database["public"]["Enums"]["module_type"]
+          order_index: number
+          parent_module_id: string | null
+          timeline_position: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_generated_content?: Json | null
+          content?: Json | null
+          course_id: string
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_hidden?: boolean | null
+          module_type: Database["public"]["Enums"]["module_type"]
+          order_index: number
+          parent_module_id?: string | null
+          timeline_position: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_generated_content?: Json | null
+          content?: Json | null
+          course_id?: string
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_hidden?: boolean | null
+          module_type?: Database["public"]["Enums"]["module_type"]
+          order_index?: number
+          parent_module_id?: string | null
+          timeline_position?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_lesson_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "sage_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sage_lesson_modules_parent_module_id_fkey"
+            columns: ["parent_module_id"]
+            isOneToOne: false
+            referencedRelation: "sage_lesson_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sage_module_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          module_id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          module_id: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          module_id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sage_module_settings_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "sage_lesson_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_achievements: {
         Row: {
           achievement_id: string | null
@@ -593,6 +821,14 @@ export type Database = {
       content_type: "lesson" | "quiz" | "project" | "video"
       difficulty_level: "beginner" | "intermediate" | "advanced"
       learning_style: "visual" | "auditory" | "reading" | "kinesthetic"
+      lesson_structure_type: "course" | "lesson" | "module"
+      module_type:
+        | "content"
+        | "quiz"
+        | "game"
+        | "video"
+        | "image"
+        | "assessment"
       user_role: "student" | "teacher" | "admin"
     }
     CompositeTypes: {
@@ -712,6 +948,8 @@ export const Constants = {
       content_type: ["lesson", "quiz", "project", "video"],
       difficulty_level: ["beginner", "intermediate", "advanced"],
       learning_style: ["visual", "auditory", "reading", "kinesthetic"],
+      lesson_structure_type: ["course", "lesson", "module"],
+      module_type: ["content", "quiz", "game", "video", "image", "assessment"],
       user_role: ["student", "teacher", "admin"],
     },
   },

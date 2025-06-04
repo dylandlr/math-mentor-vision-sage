@@ -9,12 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { X, Wand2, Save, Loader2 } from 'lucide-react';
 import { SageModuleIcon } from './SageModuleIcon';
-import { SageLessonModule, sageService } from '@/services/sageService';
+import { CourseModule, courseService } from '@/services/courseService';
 import { useToast } from '@/hooks/use-toast';
 
 interface SageModuleSettingsProps {
-  module: SageLessonModule;
-  onUpdate: (moduleId: string, updates: Partial<SageLessonModule>) => void;
+  module: CourseModule;
+  onUpdate: (moduleId: string, updates: Partial<CourseModule>) => void;
   onClose: () => void;
 }
 
@@ -57,7 +57,7 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
 
     setIsGenerating(true);
     try {
-      const generatedContent = await sageService.generateModuleContent(module.id, generationPrompt);
+      const generatedContent = await courseService.generateModuleContent(module.id, generationPrompt);
       
       // Update module with generated content
       const updates = {

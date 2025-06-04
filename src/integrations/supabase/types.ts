@@ -78,13 +78,86 @@ export type Database = {
           },
         ]
       }
+      course_modules: {
+        Row: {
+          ai_generated_content: Json | null
+          content: Json | null
+          course_id: string
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          is_hidden: boolean | null
+          is_published: boolean | null
+          module_type: string
+          order_index: number
+          parent_module_id: string | null
+          timeline_position: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_generated_content?: Json | null
+          content?: Json | null
+          course_id: string
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_hidden?: boolean | null
+          is_published?: boolean | null
+          module_type: string
+          order_index?: number
+          parent_module_id?: string | null
+          timeline_position?: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_generated_content?: Json | null
+          content?: Json | null
+          course_id?: string
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_hidden?: boolean | null
+          is_published?: boolean | null
+          module_type?: string
+          order_index?: number
+          parent_module_id?: string | null
+          timeline_position?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_modules_parent_module_id_fkey"
+            columns: ["parent_module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           created_at: string | null
           description: string | null
+          difficulty_level: Database["public"]["Enums"]["difficulty_level"]
+          estimated_duration: number | null
           grade_level: number
           id: string
           is_active: boolean | null
+          is_published: boolean | null
+          subject: string
           teacher_id: string | null
           title: string
           updated_at: string | null
@@ -92,9 +165,13 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
+          difficulty_level?: Database["public"]["Enums"]["difficulty_level"]
+          estimated_duration?: number | null
           grade_level: number
           id?: string
           is_active?: boolean | null
+          is_published?: boolean | null
+          subject?: string
           teacher_id?: string | null
           title: string
           updated_at?: string | null
@@ -102,9 +179,13 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
+          difficulty_level?: Database["public"]["Enums"]["difficulty_level"]
+          estimated_duration?: number | null
           grade_level?: number
           id?: string
           is_active?: boolean | null
+          is_published?: boolean | null
+          subject?: string
           teacher_id?: string | null
           title?: string
           updated_at?: string | null
@@ -115,6 +196,47 @@ export type Database = {
             columns: ["teacher_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generated_assets: {
+        Row: {
+          ai_system: string | null
+          asset_data: Json | null
+          asset_type: string
+          asset_url: string | null
+          created_at: string | null
+          generation_prompt: string | null
+          id: string
+          module_id: string
+        }
+        Insert: {
+          ai_system?: string | null
+          asset_data?: Json | null
+          asset_type: string
+          asset_url?: string | null
+          created_at?: string | null
+          generation_prompt?: string | null
+          id?: string
+          module_id: string
+        }
+        Update: {
+          ai_system?: string | null
+          asset_data?: Json | null
+          asset_type?: string
+          asset_url?: string | null
+          created_at?: string | null
+          generation_prompt?: string | null
+          id?: string
+          module_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_assets_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -290,7 +412,7 @@ export type Database = {
       lessons: {
         Row: {
           content: Json | null
-          course_id: string | null
+          course_id: string
           created_at: string | null
           description: string | null
           difficulty_level:
@@ -307,7 +429,7 @@ export type Database = {
         }
         Insert: {
           content?: Json | null
-          course_id?: string | null
+          course_id: string
           created_at?: string | null
           description?: string | null
           difficulty_level?:
@@ -324,7 +446,7 @@ export type Database = {
         }
         Update: {
           content?: Json | null
-          course_id?: string | null
+          course_id?: string
           created_at?: string | null
           description?: string | null
           difficulty_level?:
@@ -352,6 +474,41 @@ export type Database = {
             columns: ["generated_from_id"]
             isOneToOne: false
             referencedRelation: "generated_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          module_id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          module_id: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          module_id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_settings_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
             referencedColumns: ["id"]
           },
         ]

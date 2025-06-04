@@ -44,7 +44,13 @@ export const lessonPlayerService = {
     }
 
     return {
-      ...data,
+      id: data.id,
+      title: data.title,
+      description: data.description || '',
+      content: data.content,
+      difficulty_level: data.difficulty_level || 'beginner',
+      lesson_type: data.lesson_type || 'standard',
+      multimedia_assets: Array.isArray(data.multimedia_assets) ? data.multimedia_assets : [],
       estimated_duration: data.generated_lessons?.estimated_duration,
       points_value: data.generated_lessons?.points_value
     };
@@ -109,10 +115,17 @@ export const lessonPlayerService = {
   },
 
   async awardPoints(studentId: string, points: number): Promise<void> {
-    const { error } = await supabase.rpc('award_student_points', {
-      student_id: studentId,
-      points_to_add: points
-    });
+    // Update student points directly since the RPC function doesn't exist
+    const { error } = await supabase
+      .from('student_points')
+      .upsert({
+        student_id: studentId,
+        points: points,
+        last_activity: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'student_id'
+      });
 
     if (error) {
       console.error('Error awarding points:', error);

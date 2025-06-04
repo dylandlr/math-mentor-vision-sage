@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider } from '@/contexts/ThemeContext';
-import { MainApp } from '@/components/MainApp';
+import Index from '@/pages/Index';
 import { LessonPlayer } from '@/components/pages/LessonPlayer';
 import './App.css';
 
@@ -18,7 +18,7 @@ function App() {
           <Router>
             <Routes>
               <Route path="/lesson/:lessonId" element={<LessonPlayer />} />
-              <Route path="/*" element={<MainApp />} />
+              <Route path="/" element={<Index />} />
             </Routes>
             <Toaster />
           </Router>

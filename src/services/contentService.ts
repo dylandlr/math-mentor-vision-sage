@@ -1,14 +1,21 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ContentGenerationRequest {
-  type: 'lesson' | 'quiz' | 'practice' | 'project';
+  type: 'lesson' | 'quiz' | 'practice' | 'project' | 'course';
   subject: string;
   gradeLevel: number;
   topic: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
   learningStyle?: 'visual' | 'auditory' | 'reading' | 'kinesthetic';
   duration?: number;
+  // Additional properties for course generation
+  moduleCount?: number;
+  topics?: string[];
+  preferences?: {
+    includeQuizzes?: boolean;
+    includeGames?: boolean;
+    includeVideos?: boolean;
+  };
 }
 
 export interface GeneratedContent {

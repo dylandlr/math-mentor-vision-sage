@@ -57,7 +57,7 @@ export const MainApp = () => {
         <Sidebar userRole={userRole} />
         
         {/* Main content with left margin to account for fixed sidebar */}
-        <main className="flex-1 ml-64 p-6 bg-background min-h-[calc(100vh-4rem)]">
+        <main className="flex-1 ml-64 pt-16 p-6 bg-background min-h-screen">
           <Routes>
             {/* Student Routes */}
             <Route path="/dashboard" element={<StudentDashboard />} />

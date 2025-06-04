@@ -151,7 +151,7 @@ export const courseService = {
       throw new Error('Failed to create module');
     }
 
-    return data;
+    return data as CourseModule;
   },
 
   async getModulesByCourse(courseId: string): Promise<CourseModule[]> {
@@ -166,7 +166,10 @@ export const courseService = {
       throw new Error('Failed to fetch modules');
     }
 
-    return data || [];
+    return (data || []).map(item => ({
+      ...item,
+      module_type: item.module_type as CourseModule['module_type']
+    }));
   },
 
   async updateModule(moduleId: string, updates: Partial<CourseModule>): Promise<void> {

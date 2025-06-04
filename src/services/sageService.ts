@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { courseService, Course, CourseModule, CreateCourseRequest, CreateModuleRequest } from './courseService';
+import { courseService } from './courseService';
+import type { Course, CourseModule, CreateCourseRequest, CreateModuleRequest } from './courseService';
 
 // Legacy interfaces for backward compatibility
 export interface SageCourse extends Course {}
@@ -41,4 +42,4 @@ export const sageService = {
 };
 
 // Re-export types for backward compatibility
-export { CreateCourseRequest, CreateModuleRequest };
+export type { CreateCourseRequest, CreateModuleRequest };

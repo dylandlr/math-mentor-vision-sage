@@ -1,11 +1,13 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Trophy, Star, Award, Target, CheckCircle, Lock } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { studentService, StudentAchievement } from '@/services/studentService';
 
-interface Achievement {
+interface PotentialAchievement {
   id: string;
   title: string;
   description: string;
@@ -13,81 +15,122 @@ interface Achievement {
   category: 'learning' | 'practice' | 'streak' | 'special';
   points: number;
   isUnlocked: boolean;
-  unlockedAt?: Date;
   progress?: number;
   maxProgress?: number;
+  requirement: string;
 }
 
 export const AchievementsPage = () => {
-  // TODO: Fetch user's achievements from database
-  // TODO: Implement achievement progress tracking
-  // TODO: Add achievement unlock notifications
-  // TODO: Integrate with points/rewards system
+  const { user } = useAuth();
+  const [unlockedAchievements, setUnlockedAchievements] = useState<StudentAchievement[]>([]);
+  const [potentialAchievements, setPotentialAchievements] = useState<PotentialAchievement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalPoints: 0,
+    completedLessons: 0,
+    streakDays: 0
+  });
 
-  const [achievements] = useState<Achievement[]>([
-    {
-      id: '1',
-      title: 'First Steps',
-      description: 'Complete your first lesson',
-      icon: '🎓',
-      category: 'learning',
-      points: 50,
-      isUnlocked: true,
-      unlockedAt: new Date('2024-01-15')
-    },
-    {
-      id: '2',
-      title: 'Problem Solver',
-      description: 'Solve 50 practice problems',
-      icon: '🧩',
-      category: 'practice',
-      points: 100,
-      isUnlocked: false,
-      progress: 23,
-      maxProgress: 50
-    },
-    {
-      id: '3',
-      title: 'Streak Master',
-      description: 'Study for 7 days in a row',
-      icon: '🔥',
-      category: 'streak',
-      points: 150,
-      isUnlocked: false,
-      progress: 3,
-      maxProgress: 7
-    },
-    {
-      id: '4',
-      title: 'Math Wizard',
-      description: 'Complete an entire course',
-      icon: '🧙‍♂️',
-      category: 'learning',
-      points: 200,
-      isUnlocked: false,
-      progress: 0,
-      maxProgress: 1
-    },
-    {
-      id: '5',
-      title: 'Perfect Score',
-      description: 'Get 100% on a practice test',
-      icon: '💯',
-      category: 'practice',
-      points: 75,
-      isUnlocked: true,
-      unlockedAt: new Date('2024-01-20')
-    },
-    {
-      id: '6',
-      title: 'Early Bird',
-      description: 'Study before 8 AM',
-      icon: '🌅',
-      category: 'special',
-      points: 25,
-      isUnlocked: false
+  useEffect(() => {
+    if (user?.id) {
+      fetchAchievements();
     }
-  ]);
+  }, [user?.id]);
+
+  const fetchAchievements = async () => {
+    try {
+      setLoading(true);
+      const [achievementsData, statsData] = await Promise.all([
+        studentService.getStudentAchievements(user!.id),
+        studentService.getStudentStats(user!.id)
+      ]);
+
+      setUnlockedAchievements(achievementsData);
+      setStats(statsData);
+      generatePotentialAchievements(statsData, achievementsData);
+    } catch (error) {
+      console.error('Error fetching achievements:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generatePotentialAchievements = (stats: any, unlocked: StudentAchievement[]) => {
+    const unlockedIds = new Set(unlocked.map(a => a.title)); // Using title as ID for now
+    
+    const potential: PotentialAchievement[] = [
+      {
+        id: 'first-lesson',
+        title: 'First Steps',
+        description: 'Complete your first lesson',
+        icon: '🎓',
+        category: 'learning',
+        points: 50,
+        isUnlocked: unlockedIds.has('First Steps'),
+        progress: Math.min(stats.completedLessons, 1),
+        maxProgress: 1,
+        requirement: 'Complete 1 lesson'
+      },
+      {
+        id: 'ten-lessons',
+        title: 'Knowledge Seeker',
+        description: 'Complete 10 lessons',
+        icon: '📚',
+        category: 'learning',
+        points: 200,
+        isUnlocked: unlockedIds.has('Knowledge Seeker'),
+        progress: Math.min(stats.completedLessons, 10),
+        maxProgress: 10,
+        requirement: 'Complete 10 lessons'
+      },
+      {
+        id: 'streak-7',
+        title: 'Streak Master',
+        description: 'Study for 7 days in a row',
+        icon: '🔥',
+        category: 'streak',
+        points: 150,
+        isUnlocked: unlockedIds.has('Streak Master'),
+        progress: Math.min(stats.streakDays, 7),
+        maxProgress: 7,
+        requirement: 'Maintain 7-day study streak'
+      },
+      {
+        id: 'points-1000',
+        title: 'Point Collector',
+        description: 'Earn 1000 total points',
+        icon: '💎',
+        category: 'practice',
+        points: 100,
+        isUnlocked: unlockedIds.has('Point Collector'),
+        progress: Math.min(stats.totalPoints, 1000),
+        maxProgress: 1000,
+        requirement: 'Earn 1000 points'
+      },
+      {
+        id: 'early-bird',
+        title: 'Early Bird',
+        description: 'Study before 8 AM',
+        icon: '🌅',
+        category: 'special',
+        points: 25,
+        isUnlocked: unlockedIds.has('Early Bird'),
+        requirement: 'Complete lesson before 8 AM'
+      },
+      {
+        id: 'perfectionist',
+        title: 'Perfectionist',
+        description: 'Get 100% on 5 lessons',
+        icon: '💯',
+        category: 'practice',
+        points: 300,
+        isUnlocked: unlockedIds.has('Perfectionist'),
+        requirement: 'Score 100% on 5 lessons'
+      }
+    ];
+
+    setPotentialAchievements(potential);
+  };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -99,11 +142,27 @@ export const AchievementsPage = () => {
     }
   };
 
-  const totalPoints = achievements
-    .filter(a => a.isUnlocked)
-    .reduce((sum, a) => sum + a.points, 0);
+  const totalPoints = unlockedAchievements.reduce((sum, a) => sum + a.points, 0);
 
-  const unlockedCount = achievements.filter(a => a.isUnlocked).length;
+  if (loading) {
+    return (
+      <div className="p-6 max-w-6xl mx-auto">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-muted rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 bg-muted rounded"></div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-64 bg-muted rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-6xl mx-auto bg-background min-h-screen">
@@ -121,18 +180,18 @@ export const AchievementsPage = () => {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="text-3xl font-bold text-blue-600 mb-2">{totalPoints}</div>
-              <div className="text-sm text-muted-foreground">Total Points</div>
+              <div className="text-sm text-muted-foreground">Points from Achievements</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">{unlockedCount}</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">{unlockedAchievements.length}</div>
               <div className="text-sm text-muted-foreground">Unlocked</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-2">{achievements.length}</div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">{potentialAchievements.length}</div>
               <div className="text-sm text-muted-foreground">Total Available</div>
             </CardContent>
           </Card>
@@ -140,7 +199,7 @@ export const AchievementsPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {achievements.map((achievement) => (
+        {potentialAchievements.map((achievement) => (
           <Card 
             key={achievement.id} 
             className={`relative transition-all duration-200 ${
@@ -176,11 +235,10 @@ export const AchievementsPage = () => {
                   <Star className="h-4 w-4 text-yellow-500" />
                   <span className="text-sm font-medium text-foreground">{achievement.points} points</span>
                 </div>
-                {achievement.unlockedAt && (
-                  <span className="text-xs text-muted-foreground">
-                    Unlocked {achievement.unlockedAt.toLocaleDateString()}
-                  </span>
-                )}
+              </div>
+
+              <div className="text-xs text-muted-foreground mb-3">
+                {achievement.requirement}
               </div>
 
               {!achievement.isUnlocked && achievement.progress !== undefined && achievement.maxProgress && (
@@ -195,6 +253,12 @@ export const AchievementsPage = () => {
                     value={(achievement.progress / achievement.maxProgress) * 100} 
                     className="h-2" 
                   />
+                </div>
+              )}
+
+              {achievement.isUnlocked && (
+                <div className="text-xs text-green-600 font-medium">
+                  Unlocked! +{achievement.points} points earned
                 </div>
               )}
             </CardContent>

@@ -1,15 +1,50 @@
 
-import { Trophy, Clock, Target, BookOpen, Brain, Zap, MessageCircle, Play } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Trophy, Clock, Target, BookOpen, Brain, Zap, MessageCircle, Play, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserData } from '@/hooks/useUserData';
+import { studentService, StudentCourse, StudentAchievement } from '@/services/studentService';
 
 export const StudentDashboard = () => {
-  const { profile } = useAuth();
-  const { courses, achievements, points, loading } = useUserData();
+  const { user, profile } = useAuth();
+  const [courses, setCourses] = useState<StudentCourse[]>([]);
+  const [achievements, setAchievements] = useState<StudentAchievement[]>([]);
+  const [stats, setStats] = useState({
+    totalPoints: 0,
+    streakDays: 0,
+    completedLessons: 0,
+    averageScore: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchDashboardData();
+    }
+  }, [user?.id]);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [coursesData, achievementsData, statsData] = await Promise.all([
+        studentService.getEnrolledCourses(user!.id),
+        studentService.getStudentAchievements(user!.id),
+        studentService.getStudentStats(user!.id)
+      ]);
+
+      setCourses(coursesData);
+      setAchievements(achievementsData.slice(0, 3)); // Show only recent 3
+      setStats(statsData);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -33,11 +68,6 @@ export const StudentDashboard = () => {
   }
 
   const userName = profile?.full_name?.split(' ')[0] || 'Student';
-  const totalPoints = points?.points || 0;
-  const streakDays = points?.streak_days || 0;
-
-  // Calculate success rate from courses
-  const successRate = courses.length > 0 ? 89 : 0; // Mock calculation for now
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -47,16 +77,20 @@ export const StudentDashboard = () => {
         <p className="text-blue-100 text-lg">Ready to continue your math journey?</p>
         <div className="flex items-center space-x-6 mt-6">
           <div className="text-center">
-            <div className="text-2xl font-bold">{totalPoints}</div>
+            <div className="text-2xl font-bold">{stats.totalPoints}</div>
             <div className="text-sm text-blue-200">Total Points</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold">{streakDays}</div>
+            <div className="text-2xl font-bold">{stats.streakDays}</div>
             <div className="text-sm text-blue-200">Day Streak</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold">{successRate}%</div>
-            <div className="text-sm text-blue-200">Success Rate</div>
+            <div className="text-2xl font-bold">{stats.averageScore}%</div>
+            <div className="text-sm text-blue-200">Avg Score</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold">{stats.completedLessons}</div>
+            <div className="text-sm text-blue-200">Completed</div>
           </div>
         </div>
       </div>
@@ -74,20 +108,22 @@ export const StudentDashboard = () => {
                       <h3 className="text-lg font-semibold text-foreground">{course.title}</h3>
                       <p className="text-muted-foreground">{course.description}</p>
                     </div>
-                    <span className={cn(
-                      "px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                    )}>
+                    <Badge variant="secondary">
                       Grade {course.grade_level}
-                    </span>
+                    </Badge>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Progress</span>
-                      <span className="text-foreground">0%</span>
+                      <span className="text-foreground">
+                        {course.completed_lessons}/{course.total_lessons} lessons
+                      </span>
                     </div>
-                    <Progress value={0} className="h-2" />
+                    <Progress value={course.progress} className="h-2" />
+                    <p className="text-xs text-muted-foreground">{course.progress}% complete</p>
                   </div>
                   <Button className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                    <Play className="mr-2 h-4 w-4" />
                     Continue Learning
                   </Button>
                 </CardContent>
@@ -133,12 +169,14 @@ export const StudentDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               {achievements.length > 0 ? (
-                achievements.slice(0, 3).map((achievement, index) => (
-                  <div key={index} className="flex items-center space-x-3">
+                achievements.map((achievement) => (
+                  <div key={achievement.id} className="flex items-center space-x-3">
                     <div className="text-2xl">{achievement.icon}</div>
                     <div>
                       <p className="font-medium text-sm text-foreground">{achievement.title}</p>
-                      <p className="text-xs text-muted-foreground">{achievement.description}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {achievement.points} points • {new Date(achievement.earned_at).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
                 ))
@@ -156,17 +194,30 @@ export const StudentDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Study Reminder */}
-          <Card className="bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-950/50 dark:to-yellow-950/50 border-orange-200 dark:border-orange-800">
+          {/* Study Stats */}
+          <Card className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950/50 dark:to-blue-950/50 border-green-200 dark:border-green-800">
             <CardContent className="p-4">
               <div className="flex items-center space-x-2 mb-2">
-                <Clock className="text-orange-500" size={16} />
-                <span className="font-medium text-orange-700 dark:text-orange-300">Study Reminder</span>
+                <TrendingUp className="text-green-500" size={16} />
+                <span className="font-medium text-green-700 dark:text-green-300">Your Progress</span>
               </div>
-              <p className="text-sm text-orange-600 dark:text-orange-400">Keep your learning streak going!</p>
-              <Button size="sm" className="w-full mt-3 bg-orange-500 hover:bg-orange-600">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Avg Score:</span>
+                  <span className="font-semibold">{stats.averageScore}%</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Lessons Done:</span>
+                  <span className="font-semibold">{stats.completedLessons}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Current Streak:</span>
+                  <span className="font-semibold">{stats.streakDays} days</span>
+                </div>
+              </div>
+              <Button size="sm" className="w-full mt-3 bg-green-500 hover:bg-green-600">
                 <Play size={14} className="mr-2" />
-                Start Learning
+                Continue Streak
               </Button>
             </CardContent>
           </Card>

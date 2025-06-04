@@ -1,75 +1,97 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { PlayCircle, Clock, Target, Zap, Brain, TrendingUp } from 'lucide-react';
+import { PlayCircle, Clock, Target, Zap, Brain, TrendingUp, Trophy, CheckCircle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { studentService, PracticeSession } from '@/services/studentService';
 
-interface PracticeSession {
+interface QuickPractice {
   id: string;
   title: string;
   description: string;
   type: 'quick' | 'practice' | 'test' | 'challenge';
-  duration: number; // in minutes
+  duration: number;
   questions: number;
   difficulty: 'easy' | 'medium' | 'hard';
   topic: string;
   estimatedPoints: number;
+  courseId?: string;
+  lessonId?: string;
 }
 
 export const PracticePage = () => {
-  // TODO: Fetch practice sessions from database based on user's progress
-  // TODO: Implement adaptive difficulty based on user performance
-  // TODO: Track practice session results and analytics
-  // TODO: Add personalized recommendations based on weak areas
+  const { user } = useAuth();
+  const [practiceHistory, setPracticeHistory] = useState<PracticeSession[]>([]);
+  const [stats, setStats] = useState({
+    totalPoints: 0,
+    streakDays: 0,
+    completedLessons: 0,
+    averageScore: 0
+  });
+  const [loading, setLoading] = useState(true);
 
-  const [sessions] = useState<PracticeSession[]>([
+  // Mock practice sessions - in production, these would be generated based on course content
+  const [quickSessions] = useState<QuickPractice[]>([
     {
-      id: '1',
-      title: 'Quick Algebra Review',
-      description: 'Fast-paced review of basic algebraic concepts',
+      id: 'quick-1',
+      title: 'Quick Math Review',
+      description: 'Fast-paced review of recent lessons',
       type: 'quick',
       duration: 5,
       questions: 10,
       difficulty: 'easy',
-      topic: 'Algebra',
+      topic: 'Mixed Review',
       estimatedPoints: 25
     },
     {
-      id: '2',
-      title: 'Linear Equations Practice',
-      description: 'Comprehensive practice with linear equations and graphing',
+      id: 'practice-1',
+      title: 'Fractions Practice',
+      description: 'Comprehensive practice with fractions',
       type: 'practice',
       duration: 20,
       questions: 15,
       difficulty: 'medium',
-      topic: 'Linear Equations',
+      topic: 'Fractions',
       estimatedPoints: 75
     },
     {
-      id: '3',
-      title: 'Quadratic Functions Test',
-      description: 'Full assessment of quadratic function skills',
-      type: 'test',
-      duration: 45,
-      questions: 25,
-      difficulty: 'hard',
-      topic: 'Quadratic Functions',
-      estimatedPoints: 150
-    },
-    {
-      id: '4',
+      id: 'challenge-1',
       title: 'Daily Math Challenge',
       description: "Today's special challenge problem",
       type: 'challenge',
       duration: 10,
       questions: 3,
       difficulty: 'hard',
-      topic: 'Mixed Topics',
+      topic: 'Problem Solving',
       estimatedPoints: 100
     }
   ]);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchPracticeData();
+    }
+  }, [user?.id]);
+
+  const fetchPracticeData = async () => {
+    try {
+      setLoading(true);
+      const [historyData, statsData] = await Promise.all([
+        studentService.getPracticeHistory(user!.id),
+        studentService.getStudentStats(user!.id)
+      ]);
+
+      setPracticeHistory(historyData);
+      setStats(statsData);
+    } catch (error) {
+      console.error('Error fetching practice data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -101,15 +123,31 @@ export const PracticePage = () => {
   };
 
   const handleStartPractice = (sessionId: string) => {
-    // TODO: Navigate to practice session interface
-    // TODO: Initialize session timer and question tracking
     console.log(`Starting practice session ${sessionId}`);
+    // TODO: Navigate to practice session interface
   };
 
-  // TODO: Fetch these stats from database
-  const weeklyProgress = 67;
-  const streakDays = 5;
-  const totalPoints = 1250;
+  const weeklyProgress = stats.completedLessons > 0 ? Math.min((stats.completedLessons / 10) * 100, 100) : 0;
+
+  if (loading) {
+    return (
+      <div className="p-6 max-w-6xl mx-auto">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-muted rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-24 bg-muted rounded"></div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-64 bg-muted rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-6xl mx-auto bg-background min-h-screen">
@@ -128,7 +166,7 @@ export const PracticePage = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-blue-600">{weeklyProgress}%</div>
+                  <div className="text-2xl font-bold text-blue-600">{Math.round(weeklyProgress)}%</div>
                   <div className="text-sm text-muted-foreground">Weekly Goal</div>
                 </div>
                 <TrendingUp className="h-8 w-8 text-blue-600" />
@@ -141,7 +179,7 @@ export const PracticePage = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-orange-600">{streakDays}</div>
+                  <div className="text-2xl font-bold text-orange-600">{stats.streakDays}</div>
                   <div className="text-sm text-muted-foreground">Day Streak</div>
                 </div>
                 <Zap className="h-8 w-8 text-orange-600" />
@@ -153,7 +191,7 @@ export const PracticePage = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-bold text-purple-600">{totalPoints}</div>
+                  <div className="text-2xl font-bold text-purple-600">{stats.totalPoints}</div>
                   <div className="text-sm text-muted-foreground">Total Points</div>
                 </div>
                 <Target className="h-8 w-8 text-purple-600" />
@@ -163,65 +201,141 @@ export const PracticePage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {sessions.map((session) => (
-          <Card key={session.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 rounded-lg">
-                    {getTypeIcon(session.type)}
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg text-foreground">{session.title}</CardTitle>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <Badge className={getTypeColor(session.type)}>
-                        {session.type}
-                      </Badge>
-                      <Badge className={getDifficultyColor(session.difficulty)}>
-                        {session.difficulty}
-                      </Badge>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Quick Practice Sessions */}
+        <div className="lg:col-span-2">
+          <h2 className="text-xl font-bold mb-4">Practice Sessions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {quickSessions.map((session) => (
+              <Card key={session.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-2 rounded-lg">
+                        {getTypeIcon(session.type)}
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg text-foreground">{session.title}</CardTitle>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Badge className={getTypeColor(session.type)}>
+                            {session.type}
+                          </Badge>
+                          <Badge className={getDifficultyColor(session.difficulty)}>
+                            {session.difficulty}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent>
-              <p className="text-muted-foreground mb-4">{session.description}</p>
-              
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Topic:</span>
-                  <span className="font-medium text-foreground">{session.topic}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Duration:</span>
-                  <div className="flex items-center text-foreground">
-                    <Clock size={14} className="mr-1" />
-                    {session.duration} min
+                </CardHeader>
+                
+                <CardContent>
+                  <p className="text-muted-foreground mb-4">{session.description}</p>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Topic:</span>
+                      <span className="font-medium text-foreground">{session.topic}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Duration:</span>
+                      <div className="flex items-center text-foreground">
+                        <Clock size={14} className="mr-1" />
+                        {session.duration} min
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Questions:</span>
+                      <span className="font-medium text-foreground">{session.questions}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Potential Points:</span>
+                      <span className="font-medium text-green-600">+{session.estimatedPoints}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Questions:</span>
-                  <span className="font-medium text-foreground">{session.questions}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Potential Points:</span>
-                  <span className="font-medium text-green-600">+{session.estimatedPoints}</span>
-                </div>
-              </div>
 
-              <Button
-                onClick={() => handleStartPractice(session.id)}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                <PlayCircle className="mr-2 h-4 w-4" />
-                Start Practice
-              </Button>
+                  <Button
+                    onClick={() => handleStartPractice(session.id)}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    <PlayCircle className="mr-2 h-4 w-4" />
+                    Start Practice
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Practice History */}
+        <div>
+          <h2 className="text-xl font-bold mb-4">Recent Practice</h2>
+          <Card>
+            <CardContent className="p-4">
+              {practiceHistory.length > 0 ? (
+                <div className="space-y-3">
+                  {practiceHistory.slice(0, 5).map((session) => (
+                    <div key={session.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{session.lesson_title}</p>
+                        <p className="text-xs text-muted-foreground truncate">{session.course_title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(session.completed_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right ml-2">
+                        <div className="flex items-center space-x-1">
+                          <Trophy className="h-3 w-3 text-yellow-500" />
+                          <span className="text-sm font-medium">{session.score}%</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {Math.round(session.time_spent / 60)}m
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {practiceHistory.length > 5 && (
+                    <Button variant="outline" size="sm" className="w-full">
+                      View All History
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Target className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground">No practice history yet</p>
+                  <p className="text-xs text-muted-foreground">Complete some practice sessions to see your progress!</p>
+                </div>
+              )}
             </CardContent>
           </Card>
-        ))}
+
+          {/* Performance Summary */}
+          {stats.averageScore > 0 && (
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle className="text-sm">Performance Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Average Score:</span>
+                    <span className="font-semibold">{stats.averageScore}%</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Sessions Done:</span>
+                    <span className="font-semibold">{practiceHistory.length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Current Streak:</span>
+                    <span className="font-semibold">{stats.streakDays} days</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

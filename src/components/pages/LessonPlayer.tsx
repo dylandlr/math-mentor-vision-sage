@@ -68,8 +68,7 @@ export const LessonPlayer = () => {
   const handleSectionComplete = async (sectionIndex: number) => {
     if (!lesson || !user) return;
 
-    const sections = Object.keys(lesson.content?.sections || {});
-    const totalSections = sections.length;
+    const totalSections = Object.keys(lesson.content?.sections || {}).length;
     const progressPercentage = Math.round(((sectionIndex + 1) / totalSections) * 100);
 
     try {
@@ -202,10 +201,7 @@ export const LessonPlayer = () => {
             </CardHeader>
             <CardContent className="prose max-w-none">
               <div className="whitespace-pre-wrap text-foreground">
-                {typeof currentSectionData[1] === 'string' 
-                  ? currentSectionData[1] 
-                  : JSON.stringify(currentSectionData[1], null, 2)
-                }
+                {currentSectionData[1]}
               </div>
             </CardContent>
           </Card>

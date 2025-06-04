@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,11 +9,12 @@ import { SageTimeline } from './SageTimeline';
 import { SageModuleSettings } from './SageModuleSettings';
 import { SageStudentSelector } from './SageStudentSelector';
 import { SageCourseSettings } from './SageCourseSettings';
+import { ModulePaletteHover } from './ModulePaletteHover';
+import { HoverTrigger } from './HoverTrigger';
 import { sageService, SageCourse, SageLessonModule } from '@/services/sageService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { DragDropProvider } from './DragDropContext';
-import { ModulePalette } from './ModulePalette';
 
 interface SageVisualBuilderProps {
   course: SageCourse;
@@ -27,6 +29,7 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
   const [showSettings, setShowSettings] = useState(false);
   const [showStudentSelector, setShowStudentSelector] = useState(false);
   const [showCourseSettings, setShowCourseSettings] = useState(false);
+  const [showModulePalette, setShowModulePalette] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editingTitle, setEditingTitle] = useState(false);
   const [courseTitle, setCourseTitle] = useState(course.title);
@@ -166,7 +169,6 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
     try {
       await sageService.updateModule(moduleId, { timeline_position: newPosition });
       
-      // Update local state to reflect the change
       setModules(prev => 
         prev.map(m => 
           m.id === moduleId 
@@ -203,23 +205,30 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
 
   return (
     <DragDropProvider>
-      <div className="flex min-h-screen bg-background">
-        {/* Module Palette Sidebar */}
-        <div className="w-80 bg-background border-r border-border p-6 overflow-y-auto">
-          <ModulePalette />
-        </div>
+      <div className="flex min-h-screen bg-background relative">
+        {/* Hover Trigger for Module Palette */}
+        <HoverTrigger onHoverChange={setShowModulePalette}>
+          <div className="w-full h-full bg-primary/5 border-r-2 border-primary/20 flex items-center justify-center">
+            <div className="text-primary/60 text-sm font-medium rotate-90 whitespace-nowrap">
+              Hover to select modules
+            </div>
+          </div>
+        </HoverTrigger>
 
-        {/* Main Timeline Area */}
-        <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <div className="bg-card/95 backdrop-blur-sm border-b border-border px-6 py-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Button variant="ghost" onClick={onBack} className="text-muted-foreground hover:text-foreground">
+        {/* Hoverable Module Palette */}
+        <ModulePaletteHover isVisible={showModulePalette} />
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col ml-0">
+          {/* Header with improved spacing */}
+          <div className="bg-card/95 backdrop-blur-sm border-b border-border px-8 py-6 shadow-sm">
+            <div className="flex items-center justify-between max-w-full">
+              <div className="flex items-center space-x-6 min-w-0 flex-1">
+                <Button variant="ghost" onClick={onBack} className="text-muted-foreground hover:text-foreground shrink-0">
                   ← Back to Courses
                 </Button>
-                <div>
-                  <div className="flex items-center space-x-2 mb-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center space-x-3 mb-3">
                     {editingTitle ? (
                       <div className="flex items-center space-x-2">
                         <Input
@@ -277,7 +286,7 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-6 flex-wrap gap-y-2">
                     <Badge variant="outline" className="bg-background text-foreground border-border">{course.subject}</Badge>
                     <Badge variant="outline" className="bg-background text-foreground border-border">Grade {course.grade_level}</Badge>
                     <Badge variant="outline" className="bg-background text-foreground border-border capitalize">{course.difficulty_level}</Badge>
@@ -292,7 +301,7 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3 shrink-0">
                 <Button 
                   variant="outline" 
                   onClick={() => setShowStudentSelector(true)}
@@ -327,8 +336,8 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
             </div>
           </div>
 
-          {/* Timeline Container */}
-          <div className="flex-1 p-8 bg-gradient-to-br from-background via-background to-muted/20 overflow-y-auto">
+          {/* Timeline Container with improved spacing */}
+          <div className="flex-1 px-8 py-12 bg-gradient-to-br from-background via-background to-muted/20 overflow-y-auto">
             <SageTimeline
               modules={modules}
               onModuleSelect={handleModuleSelect}
@@ -340,7 +349,7 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
           </div>
         </div>
 
-        {/* Settings Sidebar */}
+        {/* Settings Sidebar with improved spacing */}
         {showSettings && selectedModule && (
           <div className="w-96 bg-card/95 backdrop-blur-sm border-l border-border shadow-xl">
             <SageModuleSettings
@@ -351,7 +360,7 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
           </div>
         )}
 
-        {/* Course Settings Sidebar */}
+        {/* Course Settings Sidebar with improved spacing */}
         {showCourseSettings && (
           <div className="w-96 bg-card/95 backdrop-blur-sm border-l border-border shadow-xl">
             <SageCourseSettings

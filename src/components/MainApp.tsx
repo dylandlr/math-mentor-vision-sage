@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navbar } from '@/components/layout/Navbar';
@@ -9,16 +8,17 @@ import { AIMentorBubble } from '@/components/layout/AIMentorBubble';
 import { RoleSelectionDialog } from '@/components/auth/RoleSelectionDialog';
 import { MentorPage } from '@/components/pages/MentorPage';
 import { LessonsPage } from '@/components/pages/LessonsPage';
+import { AdaptiveLessonPage } from '@/components/pages/AdaptiveLessonPage';
 import { AchievementsPage } from '@/components/pages/AchievementsPage';
 import { PracticePage } from '@/components/pages/PracticePage';
 import { CoursePage } from '@/components/pages/CoursePage';
 import { TeacherContentGenerator } from '@/components/pages/TeacherContentGenerator';
 import { TeacherLessons } from '@/components/pages/TeacherLessons';
+import { TeacherLessonsAnalytics } from '@/components/pages/TeacherLessonsAnalytics';
 import { StudentManagement } from '@/components/pages/StudentManagement';
 import { AnalyticsPage } from '@/components/pages/AnalyticsPage';
 import { MessagingPage } from '@/components/pages/MessagingPage';
 import { ProfilePage } from '@/components/pages/ProfilePage';
-import { SettingsPage } from '@/components/pages/SettingsPage';
 
 export const MainApp = () => {
   const { user, profile, loading } = useAuth();
@@ -33,11 +33,9 @@ export const MainApp = () => {
   };
 
   const handleRoleSelect = () => {
-    // Force a reload to refresh the profile data after role selection
     window.location.reload();
   };
 
-  // Show loading if still loading
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -49,7 +47,6 @@ export const MainApp = () => {
     );
   }
 
-  // Show role selection if user exists but no profile (OAuth users)
   if (user && !profile) {
     return (
       <div className="min-h-screen bg-background">
@@ -62,7 +59,6 @@ export const MainApp = () => {
     );
   }
 
-  // If no profile after loading, something went wrong
   if (!profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -84,13 +80,8 @@ export const MainApp = () => {
   const userName = profile.full_name || profile.email || 'User';
 
   const renderContent = () => {
-    // Handle profile and settings pages for both roles
-    if (currentPath === '/profile') {
+    if (currentPath === '/profile' || currentPath === '/settings') {
       return <ProfilePage />;
-    }
-    
-    if (currentPath === '/settings') {
-      return <SettingsPage />;
     }
 
     if (userRole === 'student') {
@@ -101,6 +92,8 @@ export const MainApp = () => {
           return <CoursePage />;
         case '/lessons':
           return <LessonsPage />;
+        case '/lesson/adaptive':
+          return <AdaptiveLessonPage />;
         case '/mentor':
           return <MentorPage />;
         case '/achievements':
@@ -119,6 +112,8 @@ export const MainApp = () => {
           return <TeacherContentGenerator />;
         case '/teacher/lessons':
           return <TeacherLessons />;
+        case '/teacher/lesson-analytics':
+          return <TeacherLessonsAnalytics />;
         case '/teacher/students':
           return <StudentManagement />;
         case '/teacher/analytics':
@@ -144,7 +139,7 @@ export const MainApp = () => {
           {renderContent()}
         </main>
       </div>
-      {userRole === 'student' && currentPath !== '/mentor' && (
+      {userRole === 'student' && currentPath !== '/mentor' && !currentPath.includes('/lesson') && (
         <AIMentorBubble onOpenMentor={handleOpenMentor} />
       )}
     </div>

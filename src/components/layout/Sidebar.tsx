@@ -53,8 +53,8 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "bg-background border-r border-border fixed top-16 left-0 z-40 transition-all duration-300",
-      "h-[calc(100vh-4rem)] flex flex-col",
+      "bg-background border-r border-border transition-all duration-300",
+      "min-h-screen flex flex-col",
       collapsed ? "w-16" : "w-64"
     )}>
       <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">

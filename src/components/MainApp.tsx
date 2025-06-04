@@ -53,11 +53,11 @@ export const MainApp = () => {
         onNavigate={handleNavigation}
       />
       
-      <div className="flex">
+      <div className="flex pt-16">
         <Sidebar userRole={userRole} />
         
-        {/* Main content with left margin to account for fixed sidebar */}
-        <main className="flex-1 ml-64 pt-16 p-6 bg-background min-h-screen">
+        {/* Main content flows naturally next to sidebar */}
+        <main className="flex-1 p-6 bg-background min-h-screen">
           <Routes>
             {/* Student Routes */}
             <Route path="/dashboard" element={<StudentDashboard />} />

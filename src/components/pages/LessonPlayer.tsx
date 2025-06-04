@@ -68,7 +68,8 @@ export const LessonPlayer = () => {
   const handleSectionComplete = async (sectionIndex: number) => {
     if (!lesson || !user) return;
 
-    const totalSections = Object.keys(lesson.content?.sections || {}).length;
+    const sections = Object.keys(lesson.content?.sections || {});
+    const totalSections = sections.length;
     const progressPercentage = Math.round(((sectionIndex + 1) / totalSections) * 100);
 
     try {
@@ -101,6 +102,16 @@ export const LessonPlayer = () => {
       case 'advanced': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const renderContent = (content: unknown): React.ReactNode => {
+    if (typeof content === 'string') {
+      return content;
+    }
+    if (typeof content === 'object' && content !== null) {
+      return JSON.stringify(content, null, 2);
+    }
+    return String(content || '');
   };
 
   if (loading) {
@@ -201,7 +212,7 @@ export const LessonPlayer = () => {
             </CardHeader>
             <CardContent className="prose max-w-none">
               <div className="whitespace-pre-wrap text-foreground">
-                {currentSectionData[1]}
+                {renderContent(currentSectionData[1])}
               </div>
             </CardContent>
           </Card>

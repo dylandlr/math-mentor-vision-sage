@@ -45,6 +45,7 @@ export const lessonPlayerService = {
 
     return {
       ...data,
+      multimedia_assets: Array.isArray(data.multimedia_assets) ? data.multimedia_assets : [],
       estimated_duration: data.generated_lessons?.estimated_duration,
       points_value: data.generated_lessons?.points_value
     };
@@ -109,10 +110,28 @@ export const lessonPlayerService = {
   },
 
   async awardPoints(studentId: string, points: number): Promise<void> {
-    const { error } = await supabase.rpc('award_student_points', {
-      student_id: studentId,
-      points_to_add: points
-    });
+    // First try to update existing points record
+    const { data: existingPoints, error: fetchError } = await supabase
+      .from('student_points')
+      .select('points')
+      .eq('student_id', studentId)
+      .single();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('Error fetching student points:', fetchError);
+      return;
+    }
+
+    const newPointsTotal = (existingPoints?.points || 0) + points;
+
+    const { error } = await supabase
+      .from('student_points')
+      .upsert({
+        student_id: studentId,
+        points: newPointsTotal,
+        last_activity: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
 
     if (error) {
       console.error('Error awarding points:', error);

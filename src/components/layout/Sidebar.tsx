@@ -53,7 +53,7 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "bg-background border-r border-border h-screen sticky top-16 transition-all duration-300",
+      "bg-background border-r border-border h-screen fixed top-16 left-0 z-40 transition-all duration-300",
       collapsed ? "w-16" : "w-64"
     )}>
       <div className="flex items-center justify-between p-4 border-b border-border">
@@ -72,7 +72,7 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
         </Button>
       </div>
       
-      <nav className="p-2 space-y-1">
+      <nav className="p-2 space-y-1 overflow-y-auto h-[calc(100vh-8rem)]">
         {items.map((item) => (
           <button
             key={item.path}

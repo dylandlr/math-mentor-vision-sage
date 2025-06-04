@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { X, Save, Loader2, Settings, Brain } from 'lucide-react';
-import { SageCourse } from '@/services/sageService';
+import { SageCourse, sageService } from '@/services/sageService';
 import { useToast } from '@/hooks/use-toast';
 import { SageAIGeneration } from './SageAIGeneration';
 
@@ -26,21 +26,32 @@ export const SageCourseSettings = ({ course, onClose, onCourseUpdate }: SageCour
   const [subject, setSubject] = useState(course.subject);
   const [gradeLevel, setGradeLevel] = useState(course.grade_level);
   const [difficulty, setDifficulty] = useState(course.difficulty_level);
+  const [estimatedDuration, setEstimatedDuration] = useState(course.estimated_duration || 0);
   const [isPublished, setIsPublished] = useState(course.is_published || false);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Here you would typically save to the database
+      await sageService.updateCourse(course.id, {
+        title,
+        description,
+        subject,
+        grade_level: gradeLevel,
+        difficulty_level: difficulty,
+        estimated_duration: estimatedDuration,
+        is_published: isPublished,
+        updated_at: new Date().toISOString()
+      });
+
       toast({
         title: "Settings Saved",
         description: "Course settings have been updated successfully.",
       });
-      setTimeout(() => {
-        setIsSaving(false);
-        onClose();
-      }, 1000);
+
+      if (onCourseUpdate) {
+        onCourseUpdate();
+      }
     } catch (error) {
       console.error('Failed to save course settings:', error);
       toast({
@@ -48,6 +59,7 @@ export const SageCourseSettings = ({ course, onClose, onCourseUpdate }: SageCour
         description: "Failed to save course settings.",
         variant: "destructive",
       });
+    } finally {
       setIsSaving(false);
     }
   };
@@ -150,18 +162,33 @@ export const SageCourseSettings = ({ course, onClose, onCourseUpdate }: SageCour
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="course-difficulty" className="text-foreground">Difficulty Level</Label>
-                  <Select value={difficulty} onValueChange={(value: any) => setDifficulty(value)}>
-                    <SelectTrigger className="bg-background border-border text-foreground">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border-border">
-                      <SelectItem value="beginner">Beginner</SelectItem>
-                      <SelectItem value="intermediate">Intermediate</SelectItem>
-                      <SelectItem value="advanced">Advanced</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="course-difficulty" className="text-foreground">Difficulty Level</Label>
+                    <Select value={difficulty} onValueChange={(value: any) => setDifficulty(value)}>
+                      <SelectTrigger className="bg-background border-border text-foreground">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover border-border">
+                        <SelectItem value="beginner">Beginner</SelectItem>
+                        <SelectItem value="intermediate">Intermediate</SelectItem>
+                        <SelectItem value="advanced">Advanced</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="estimated-duration" className="text-foreground">Estimated Duration (minutes)</Label>
+                    <Input
+                      id="estimated-duration"
+                      type="number"
+                      value={estimatedDuration}
+                      onChange={(e) => setEstimatedDuration(parseInt(e.target.value) || 0)}
+                      min={0}
+                      max={1440}
+                      className="bg-background border-border text-foreground"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -203,6 +230,10 @@ export const SageCourseSettings = ({ course, onClose, onCourseUpdate }: SageCour
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Status:</span>
                   <span className="text-foreground">{isPublished ? 'Published' : 'Draft'}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Estimated Duration:</span>
+                  <span className="text-foreground">{estimatedDuration} minutes</span>
                 </div>
               </CardContent>
             </Card>

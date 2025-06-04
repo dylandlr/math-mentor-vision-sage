@@ -20,6 +20,10 @@ export const sageService = {
     return courseService.getCourseById(courseId);
   },
 
+  async updateCourse(courseId: string, updates: Partial<SageCourse>): Promise<void> {
+    return courseService.updateCourse(courseId, updates);
+  },
+
   async updateCourseTitle(courseId: string, title: string): Promise<void> {
     return courseService.updateCourseTitle(courseId, title);
   },

@@ -7,7 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { X, Wand2, Save, Loader2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { X, Wand2, Save, Loader2, Eye, EyeOff } from 'lucide-react';
 import { SageModuleIcon } from './SageModuleIcon';
 import { CourseModule, courseService } from '@/services/courseService';
 import { useToast } from '@/hooks/use-toast';
@@ -24,9 +26,30 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
   const [description, setDescription] = useState(module.description || '');
   const [duration, setDuration] = useState(module.duration_minutes);
   const [moduleType, setModuleType] = useState(module.module_type);
+  const [isHidden, setIsHidden] = useState(module.is_hidden);
+  const [isPublished, setIsPublished] = useState(module.is_published);
+  const [timelinePosition, setTimelinePosition] = useState(module.timeline_position);
+  const [orderIndex, setOrderIndex] = useState(module.order_index);
   const [generationPrompt, setGenerationPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Advanced settings
+  const [difficultyLevel, setDifficultyLevel] = useState(
+    (module.content?.difficulty_level as string) || 'intermediate'
+  );
+  const [interactionLevel, setInteractionLevel] = useState(
+    (module.content?.interaction_level as number) || 3
+  );
+  const [requiresCompletion, setRequiresCompletion] = useState(
+    (module.content?.requires_completion as boolean) || false
+  );
+  const [allowSkip, setAllowSkip] = useState(
+    (module.content?.allow_skip as boolean) || true
+  );
+  const [maxAttempts, setMaxAttempts] = useState(
+    (module.content?.max_attempts as number) || 3
+  );
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -35,11 +58,36 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
         title,
         description,
         duration_minutes: duration,
-        module_type: moduleType
+        module_type: moduleType,
+        is_hidden: isHidden,
+        is_published: isPublished,
+        timeline_position: timelinePosition,
+        order_index: orderIndex,
+        content: {
+          ...module.content,
+          difficulty_level: difficultyLevel,
+          interaction_level: interactionLevel,
+          requires_completion: requiresCompletion,
+          allow_skip: allowSkip,
+          max_attempts: maxAttempts,
+        },
+        updated_at: new Date().toISOString()
       };
+      
+      await courseService.updateModule(module.id, updates);
       await onUpdate(module.id, updates);
+      
+      toast({
+        title: "Module Updated",
+        description: "Module settings have been saved successfully.",
+      });
     } catch (error) {
       console.error('Failed to save module:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save module settings.",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -158,6 +206,128 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
                   className="bg-background border-border text-foreground"
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="timeline-position" className="text-foreground">Timeline Position</Label>
+                <Input
+                  id="timeline-position"
+                  type="number"
+                  value={timelinePosition}
+                  onChange={(e) => setTimelinePosition(parseInt(e.target.value) || 0)}
+                  min={0}
+                  className="bg-background border-border text-foreground"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="order-index" className="text-foreground">Order Index</Label>
+                <Input
+                  id="order-index"
+                  type="number"
+                  value={orderIndex}
+                  onChange={(e) => setOrderIndex(parseInt(e.target.value) || 0)}
+                  min={0}
+                  className="bg-background border-border text-foreground"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Advanced Settings */}
+        <Card className="bg-background border-border">
+          <CardHeader>
+            <CardTitle className="text-sm text-foreground">Advanced Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="difficulty-level" className="text-foreground">Difficulty Level</Label>
+              <Select value={difficultyLevel} onValueChange={setDifficultyLevel}>
+                <SelectTrigger className="bg-background border-border text-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-foreground">Interaction Level: {interactionLevel}</Label>
+              <Slider
+                value={[interactionLevel]}
+                onValueChange={(value) => setInteractionLevel(value[0])}
+                max={5}
+                min={1}
+                step={1}
+                className="mt-2"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>Low</span>
+                <span>High</span>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="max-attempts" className="text-foreground">Max Attempts</Label>
+              <Input
+                id="max-attempts"
+                type="number"
+                value={maxAttempts}
+                onChange={(e) => setMaxAttempts(parseInt(e.target.value) || 1)}
+                min={1}
+                max={10}
+                className="bg-background border-border text-foreground"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-foreground">Requires Completion</Label>
+                  <p className="text-xs text-muted-foreground">Students must complete this module to proceed</p>
+                </div>
+                <Switch checked={requiresCompletion} onCheckedChange={setRequiresCompletion} />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-foreground">Allow Skip</Label>
+                  <p className="text-xs text-muted-foreground">Students can skip this module</p>
+                </div>
+                <Switch checked={allowSkip} onCheckedChange={setAllowSkip} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Visibility Settings */}
+        <Card className="bg-background border-border">
+          <CardHeader>
+            <CardTitle className="text-sm text-foreground">Visibility & Publishing</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                {isHidden ? <EyeOff size={16} /> : <Eye size={16} />}
+                <div>
+                  <Label className="text-foreground">Hidden</Label>
+                  <p className="text-xs text-muted-foreground">Hide this module from students</p>
+                </div>
+              </div>
+              <Switch checked={isHidden} onCheckedChange={setIsHidden} />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-foreground">Published</Label>
+                <p className="text-xs text-muted-foreground">Make this module available to students</p>
+              </div>
+              <Switch checked={isPublished} onCheckedChange={setIsPublished} />
             </div>
           </CardContent>
         </Card>

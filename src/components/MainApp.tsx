@@ -53,7 +53,7 @@ export const MainApp = () => {
         onNavigate={handleNavigation}
       />
       
-      <div className="flex pt-16">
+      <div className="flex">
         <Sidebar userRole={userRole} />
         
         {/* Main content flows naturally next to sidebar */}

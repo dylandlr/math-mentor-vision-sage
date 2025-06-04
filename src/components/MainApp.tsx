@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { AIMentorBubble } from '@/components/layout/AIMentorBubble';
@@ -22,6 +22,7 @@ import { useAuth } from '@/hooks/useAuth';
 export const MainApp = () => {
   const { user, profile } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showMentorChat, setShowMentorChat] = useState(false);
 
   if (!user || !profile) {
@@ -29,10 +30,23 @@ export const MainApp = () => {
   }
 
   const userRole = profile.role === 'teacher' || profile.role === 'admin' ? 'teacher' : 'student';
+  const userName = profile.full_name || user.email || 'User';
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
+
+  const handleOpenMentor = () => {
+    navigate('/mentor');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Navbar 
+        userRole={userRole}
+        userName={userName}
+        onNavigate={handleNavigation}
+      />
       
       <div className="flex">
         <Sidebar userRole={userRole} />
@@ -69,8 +83,7 @@ export const MainApp = () => {
       {/* AI Mentor Bubble - only show for students and not on mentor page */}
       {userRole === 'student' && location.pathname !== '/mentor' && (
         <AIMentorBubble 
-          isOpen={showMentorChat}
-          onToggle={() => setShowMentorChat(!showMentorChat)}
+          onOpenMentor={handleOpenMentor}
         />
       )}
     </div>

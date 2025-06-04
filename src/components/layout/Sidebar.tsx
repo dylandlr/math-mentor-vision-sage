@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Home, 
   BookOpen, 
@@ -19,12 +20,12 @@ import { cn } from '@/lib/utils';
 
 interface SidebarProps {
   userRole: 'student' | 'teacher';
-  currentPath: string;
-  onNavigate: (path: string) => void;
 }
 
-export const Sidebar = ({ userRole, currentPath, onNavigate }: SidebarProps) => {
+export const Sidebar = ({ userRole }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const studentItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
@@ -45,6 +46,10 @@ export const Sidebar = ({ userRole, currentPath, onNavigate }: SidebarProps) => 
   ];
 
   const items = userRole === 'student' ? studentItems : teacherItems;
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
 
   return (
     <div className={cn(
@@ -71,10 +76,10 @@ export const Sidebar = ({ userRole, currentPath, onNavigate }: SidebarProps) => 
         {items.map((item) => (
           <button
             key={item.path}
-            onClick={() => onNavigate(item.path)}
+            onClick={() => handleNavigation(item.path)}
             className={cn(
               "w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors",
-              currentPath === item.path 
+              location.pathname === item.path 
                 ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700" 
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}

@@ -85,14 +85,14 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-card">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center space-x-2">
           <SageModuleIcon type={moduleType} size={20} />
-          <h2 className="text-lg font-semibold">Module Settings</h2>
+          <h2 className="text-lg font-semibold text-foreground">Module Settings</h2>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
+        <Button variant="ghost" size="sm" onClick={onClose} className="hover:bg-accent">
           <X size={16} />
         </Button>
       </div>
@@ -100,40 +100,42 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Basic Settings */}
-        <Card>
+        <Card className="bg-background border-border">
           <CardHeader>
-            <CardTitle className="text-sm">Basic Settings</CardTitle>
+            <CardTitle className="text-sm text-foreground">Basic Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="module-title">Title</Label>
+              <Label htmlFor="module-title" className="text-foreground">Title</Label>
               <Input
                 id="module-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Module title..."
+                className="bg-background border-border text-foreground"
               />
             </div>
 
             <div>
-              <Label htmlFor="module-description">Description</Label>
+              <Label htmlFor="module-description" className="text-foreground">Description</Label>
               <Textarea
                 id="module-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Module description..."
                 rows={3}
+                className="bg-background border-border text-foreground"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="module-type">Type</Label>
+                <Label htmlFor="module-type" className="text-foreground">Type</Label>
                 <Select value={moduleType} onValueChange={(value: any) => setModuleType(value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background border-border text-foreground">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover border-border">
                     <SelectItem value="content">Content</SelectItem>
                     <SelectItem value="quiz">Quiz</SelectItem>
                     <SelectItem value="game">Game</SelectItem>
@@ -145,7 +147,7 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
               </div>
 
               <div>
-                <Label htmlFor="module-duration">Duration (min)</Label>
+                <Label htmlFor="module-duration" className="text-foreground">Duration (min)</Label>
                 <Input
                   id="module-duration"
                   type="number"
@@ -153,6 +155,7 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
                   onChange={(e) => setDuration(parseInt(e.target.value) || 5)}
                   min={1}
                   max={120}
+                  className="bg-background border-border text-foreground"
                 />
               </div>
             </div>
@@ -160,22 +163,23 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
         </Card>
 
         {/* AI Content Generation */}
-        <Card>
+        <Card className="bg-background border-border">
           <CardHeader>
-            <CardTitle className="text-sm flex items-center space-x-2">
+            <CardTitle className="text-sm flex items-center space-x-2 text-foreground">
               <Wand2 size={16} />
               <span>SAGE AI Content Generation</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="generation-prompt">Content Generation Prompt</Label>
+              <Label htmlFor="generation-prompt" className="text-foreground">Content Generation Prompt</Label>
               <Textarea
                 id="generation-prompt"
                 value={generationPrompt}
                 onChange={(e) => setGenerationPrompt(e.target.value)}
                 placeholder="Describe what content you want SAGE to generate for this module..."
                 rows={3}
+                className="bg-background border-border text-foreground"
               />
             </div>
 
@@ -199,10 +203,10 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
 
             {/* Generated Content Preview */}
             {module.ai_generated_content && Object.keys(module.ai_generated_content).length > 0 && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                <div className="text-xs font-medium text-gray-600 mb-2">Generated Content:</div>
-                <Badge variant="outline" className="mb-2">AI Generated</Badge>
-                <div className="text-xs text-gray-600 max-h-32 overflow-y-auto">
+              <div className="mt-4 p-3 bg-muted rounded-lg border border-border">
+                <div className="text-xs font-medium text-muted-foreground mb-2">Generated Content:</div>
+                <Badge variant="outline" className="mb-2 bg-background text-foreground border-border">AI Generated</Badge>
+                <div className="text-xs text-muted-foreground max-h-32 overflow-y-auto">
                   {JSON.stringify(module.ai_generated_content, null, 2)}
                 </div>
               </div>
@@ -212,12 +216,12 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
 
         {/* Module Content */}
         {module.content && Object.keys(module.content).length > 0 && (
-          <Card>
+          <Card className="bg-background border-border">
             <CardHeader>
-              <CardTitle className="text-sm">Current Content</CardTitle>
+              <CardTitle className="text-sm text-foreground">Current Content</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xs text-gray-600 max-h-32 overflow-y-auto bg-gray-50 p-3 rounded">
+              <div className="text-xs text-muted-foreground max-h-32 overflow-y-auto bg-muted p-3 rounded border border-border">
                 {JSON.stringify(module.content, null, 2)}
               </div>
             </CardContent>
@@ -226,7 +230,7 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-border">
         <Button 
           onClick={handleSave}
           disabled={isSaving}

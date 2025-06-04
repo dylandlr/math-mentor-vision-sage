@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -61,7 +60,7 @@ export const SageCourseLibrary = ({ onCourseSelect }: SageCourseLibraryProps) =>
     if (!user || !newCourse.title.trim()) return;
 
     try {
-      const course = await sageService.createCourse(newCourse);
+      const course = await sageService.createCourse(newCourse, user.id);
       setCourses(prev => [course, ...prev]);
       setShowCreateDialog(false);
       setNewCourse({

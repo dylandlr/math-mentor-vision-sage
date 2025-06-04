@@ -171,7 +171,7 @@ export const SageTimeline = ({
                       </Card>
                     ) : (
                       <Button
-                        variant="dashed"
+                        variant="outline"
                         className={`w-full h-16 border-2 border-dashed transition-all duration-200 ${
                           isHovered 
                             ? 'border-purple-400 bg-purple-50 text-purple-600' 

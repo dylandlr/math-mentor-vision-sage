@@ -53,10 +53,15 @@ export interface CreateModuleRequest {
 }
 
 export const sageService = {
-  async createCourse(request: CreateCourseRequest): Promise<SageCourse> {
+  async createCourse(request: CreateCourseRequest, teacherId: string): Promise<SageCourse> {
+    const courseData = {
+      ...request,
+      teacher_id: teacherId
+    };
+
     const { data, error } = await supabase
       .from('sage_courses')
-      .insert([request])
+      .insert([courseData])
       .select()
       .single();
 

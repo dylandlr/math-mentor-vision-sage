@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,17 +33,17 @@ export const SageModuleSettings = ({ module, onUpdate, onClose }: SageModuleSett
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Advanced settings
+  // Advanced settings - Fix the boolean type declarations
   const [difficultyLevel, setDifficultyLevel] = useState(
     (module.content?.difficulty_level as string) || 'intermediate'
   );
   const [interactionLevel, setInteractionLevel] = useState(
     (module.content?.interaction_level as number) || 3
   );
-  const [requiresCompletion, setRequiresCompletion] = useState(
+  const [requiresCompletion, setRequiresCompletion] = useState<boolean>(
     (module.content?.requires_completion as boolean) || false
   );
-  const [allowSkip, setAllowSkip] = useState(
+  const [allowSkip, setAllowSkip] = useState<boolean>(
     (module.content?.allow_skip as boolean) || true
   );
   const [maxAttempts, setMaxAttempts] = useState(

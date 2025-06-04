@@ -37,7 +37,7 @@ export const Sidebar = ({ userRole, currentPath, onNavigate }: SidebarProps) => 
 
   const teacherItems = [
     { icon: Home, label: 'Dashboard', path: '/teacher' },
-    { icon: Wand2, label: 'AI Content', path: '/teacher/courses' },
+    { icon: Wand2, label: 'SAGE Builder', path: '/sage' },
     { icon: GraduationCap, label: 'My Lessons', path: '/teacher/lessons' },
     { icon: Users, label: 'Students', path: '/teacher/students' },
     { icon: BarChart3, label: 'Analytics', path: '/teacher/analytics' },

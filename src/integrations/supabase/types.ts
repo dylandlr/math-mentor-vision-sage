@@ -227,7 +227,7 @@ export type Database = {
             foreignKeyName: "lesson_assignments_lesson_id_fkey"
             columns: ["lesson_id"]
             isOneToOne: false
-            referencedRelation: "generated_lessons"
+            referencedRelation: "lessons"
             referencedColumns: ["id"]
           },
           {
@@ -296,8 +296,11 @@ export type Database = {
           difficulty_level:
             | Database["public"]["Enums"]["difficulty_level"]
             | null
+          generated_from_id: string | null
           id: string
           is_published: boolean | null
+          lesson_type: string | null
+          multimedia_assets: Json | null
           order_index: number
           title: string
           updated_at: string | null
@@ -310,8 +313,11 @@ export type Database = {
           difficulty_level?:
             | Database["public"]["Enums"]["difficulty_level"]
             | null
+          generated_from_id?: string | null
           id?: string
           is_published?: boolean | null
+          lesson_type?: string | null
+          multimedia_assets?: Json | null
           order_index: number
           title: string
           updated_at?: string | null
@@ -324,8 +330,11 @@ export type Database = {
           difficulty_level?:
             | Database["public"]["Enums"]["difficulty_level"]
             | null
+          generated_from_id?: string | null
           id?: string
           is_published?: boolean | null
+          lesson_type?: string | null
+          multimedia_assets?: Json | null
           order_index?: number
           title?: string
           updated_at?: string | null
@@ -336,6 +345,13 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_generated_from_id_fkey"
+            columns: ["generated_from_id"]
+            isOneToOne: false
+            referencedRelation: "generated_lessons"
             referencedColumns: ["id"]
           },
         ]

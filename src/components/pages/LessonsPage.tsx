@@ -1,5 +1,5 @@
-
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { studentService, StudentLesson } from '@/services/studentService';
 
 export const LessonsPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [lessons, setLessons] = useState<StudentLesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState<string>('all');
@@ -33,8 +34,7 @@ export const LessonsPage = () => {
   };
 
   const handleStartLesson = (lessonId: string) => {
-    // TODO: Navigate to lesson player
-    console.log(`Starting lesson ${lessonId}`);
+    navigate(`/lesson/${lessonId}`);
   };
 
   const getDifficultyColor = (difficulty: string) => {

@@ -17,6 +17,7 @@ import { AnalyticsPage } from '@/components/pages/AnalyticsPage';
 import { MessagingPage } from '@/components/pages/MessagingPage';
 import { ProfilePage } from '@/components/pages/ProfilePage';
 import { SagePage } from '@/components/pages/SagePage';
+import { LessonPlayer } from '@/components/pages/LessonPlayer';
 import { useAuth } from '@/hooks/useAuth';
 
 export const MainApp = () => {
@@ -26,7 +27,11 @@ export const MainApp = () => {
   const [showMentorChat, setShowMentorChat] = useState(false);
 
   if (!user || !profile) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   const userRole = profile.role === 'teacher' || profile.role === 'admin' ? 'teacher' : 'student';
@@ -41,7 +46,7 @@ export const MainApp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Navbar 
         userRole={userRole}
         userName={userName}
@@ -51,7 +56,7 @@ export const MainApp = () => {
       <div className="flex">
         <Sidebar userRole={userRole} />
         
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 bg-background">
           <Routes>
             {/* Student Routes */}
             <Route path="/dashboard" element={<StudentDashboard />} />
@@ -68,6 +73,9 @@ export const MainApp = () => {
             <Route path="/teacher/students" element={<StudentManagement />} />
             <Route path="/teacher/analytics" element={<AnalyticsPage />} />
             <Route path="/teacher/messages" element={<MessagingPage />} />
+            
+            {/* Special Routes */}
+            <Route path="/lesson/:lessonId" element={<LessonPlayer />} />
             
             {/* Shared Routes */}
             <Route path="/profile" element={<ProfilePage />} />

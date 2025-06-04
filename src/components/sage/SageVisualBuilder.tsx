@@ -29,6 +29,7 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
   const [loading, setLoading] = useState(true);
   const [editingTitle, setEditingTitle] = useState(false);
   const [courseTitle, setCourseTitle] = useState(course.title);
+  const [savingTitle, setSavingTitle] = useState(false);
 
   useEffect(() => {
     fetchModules();
@@ -132,13 +133,32 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
     }
   };
 
-  const handleSaveTitle = () => {
-    // Here you would typically save the title to the database
-    setEditingTitle(false);
-    toast({
-      title: "Title Updated",
-      description: "Course title has been saved.",
-    });
+  const handleSaveTitle = async () => {
+    if (courseTitle.trim() === '' || courseTitle === course.title) {
+      setEditingTitle(false);
+      setCourseTitle(course.title);
+      return;
+    }
+
+    setSavingTitle(true);
+    try {
+      await sageService.updateCourseTitle(course.id, courseTitle.trim());
+      setEditingTitle(false);
+      toast({
+        title: "Title Updated",
+        description: "Course title has been saved successfully.",
+      });
+    } catch (error) {
+      console.error('Failed to save title:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save course title.",
+        variant: "destructive",
+      });
+      setCourseTitle(course.title);
+    } finally {
+      setSavingTitle(false);
+    }
   };
 
   const getTotalDuration = () => {
@@ -171,7 +191,7 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
                       <Input
                         value={courseTitle}
                         onChange={(e) => setCourseTitle(e.target.value)}
-                        className="text-2xl font-bold bg-background"
+                        className="text-2xl font-bold bg-background border-border h-12 min-w-96"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') handleSaveTitle();
                           if (e.key === 'Escape') {
@@ -179,9 +199,20 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
                             setEditingTitle(false);
                           }
                         }}
+                        disabled={savingTitle}
+                        autoFocus
                       />
-                      <Button size="sm" onClick={handleSaveTitle}>
-                        <Save size={14} />
+                      <Button 
+                        size="sm" 
+                        onClick={handleSaveTitle}
+                        disabled={savingTitle || courseTitle.trim() === ''}
+                        className="h-8"
+                      >
+                        {savingTitle ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                        ) : (
+                          <Save size={14} />
+                        )}
                       </Button>
                       <Button 
                         size="sm" 
@@ -190,6 +221,8 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
                           setCourseTitle(course.title);
                           setEditingTitle(false);
                         }}
+                        disabled={savingTitle}
+                        className="h-8"
                       >
                         <X size={14} />
                       </Button>
@@ -203,7 +236,7 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
                         size="sm" 
                         variant="ghost" 
                         onClick={() => setEditingTitle(true)}
-                        className="text-muted-foreground hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                       >
                         <Edit size={14} />
                       </Button>
@@ -261,7 +294,7 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
         </div>
 
         {/* Timeline Container */}
-        <div className="flex-1 p-6 bg-background">
+        <div className="flex-1 p-8 bg-background overflow-y-auto">
           <SageTimeline
             modules={modules}
             onModuleSelect={handleModuleSelect}

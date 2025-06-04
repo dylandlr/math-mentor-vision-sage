@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Course {
@@ -116,6 +115,18 @@ export const courseService = {
     if (error) {
       console.error('Error updating course:', error);
       throw new Error('Failed to update course');
+    }
+  },
+
+  async updateCourseTitle(courseId: string, title: string): Promise<void> {
+    const { error } = await supabase
+      .from('courses')
+      .update({ title, updated_at: new Date().toISOString() })
+      .eq('id', courseId);
+
+    if (error) {
+      console.error('Error updating course title:', error);
+      throw new Error('Failed to update course title');
     }
   },
 

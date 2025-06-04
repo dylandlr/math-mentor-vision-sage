@@ -53,13 +53,10 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "bg-background border-r border-border fixed top-0 left-0 z-40 transition-all duration-300",
-      "h-screen flex flex-col",
+      "bg-background border-r border-border fixed top-16 left-0 z-40 transition-all duration-300",
+      "h-[calc(100vh-4rem)] flex flex-col",
       collapsed ? "w-16" : "w-64"
     )}>
-      {/* Add top padding to account for navbar */}
-      <div className="h-16 flex-shrink-0"></div>
-      
       <div className="flex items-center justify-between p-4 border-b border-border flex-shrink-0">
         {!collapsed && (
           <h2 className="font-semibold text-foreground">

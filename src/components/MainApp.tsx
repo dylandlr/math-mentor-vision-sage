@@ -8,13 +8,11 @@ import { AIMentorBubble } from '@/components/layout/AIMentorBubble';
 import { RoleSelectionDialog } from '@/components/auth/RoleSelectionDialog';
 import { MentorPage } from '@/components/pages/MentorPage';
 import { LessonsPage } from '@/components/pages/LessonsPage';
-import { AdaptiveLessonPage } from '@/components/pages/AdaptiveLessonPage';
 import { AchievementsPage } from '@/components/pages/AchievementsPage';
 import { PracticePage } from '@/components/pages/PracticePage';
 import { CoursePage } from '@/components/pages/CoursePage';
 import { TeacherContentGenerator } from '@/components/pages/TeacherContentGenerator';
 import { TeacherLessons } from '@/components/pages/TeacherLessons';
-import { TeacherLessonsAnalytics } from '@/components/pages/TeacherLessonsAnalytics';
 import { StudentManagement } from '@/components/pages/StudentManagement';
 import { AnalyticsPage } from '@/components/pages/AnalyticsPage';
 import { MessagingPage } from '@/components/pages/MessagingPage';
@@ -92,8 +90,6 @@ export const MainApp = () => {
           return <CoursePage />;
         case '/lessons':
           return <LessonsPage />;
-        case '/lesson/adaptive':
-          return <AdaptiveLessonPage />;
         case '/mentor':
           return <MentorPage />;
         case '/achievements':
@@ -112,8 +108,6 @@ export const MainApp = () => {
           return <TeacherContentGenerator />;
         case '/teacher/lessons':
           return <TeacherLessons />;
-        case '/teacher/lesson-analytics':
-          return <TeacherLessonsAnalytics />;
         case '/teacher/students':
           return <StudentManagement />;
         case '/teacher/analytics':

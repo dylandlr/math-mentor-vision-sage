@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,8 @@ import { SageCourseSettings } from './SageCourseSettings';
 import { sageService, SageCourse, SageLessonModule } from '@/services/sageService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { DragDropProvider } from './DragDropContext';
+import { ModulePalette } from './ModulePalette';
 
 interface SageVisualBuilderProps {
   course: SageCourse;
@@ -161,6 +162,33 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
     }
   };
 
+  const handleModuleReorder = async (moduleId: string, newPosition: number) => {
+    try {
+      await sageService.updateModule(moduleId, { timeline_position: newPosition });
+      
+      // Update local state to reflect the change
+      setModules(prev => 
+        prev.map(m => 
+          m.id === moduleId 
+            ? { ...m, timeline_position: newPosition }
+            : m
+        ).sort((a, b) => a.timeline_position - b.timeline_position)
+      );
+      
+      toast({
+        title: "Module Reordered",
+        description: "Module position has been updated successfully.",
+      });
+    } catch (error) {
+      console.error('Failed to reorder module:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reorder module.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getTotalDuration = () => {
     return modules.reduce((total, module) => total + module.duration_minutes, 0);
   };
@@ -174,165 +202,173 @@ export const SageVisualBuilder = ({ course, onBack }: SageVisualBuilderProps) =>
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Main Timeline Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="bg-card border-b border-border px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" onClick={onBack} className="text-muted-foreground hover:text-foreground">
-                ← Back to Courses
-              </Button>
-              <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  {editingTitle ? (
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        value={courseTitle}
-                        onChange={(e) => setCourseTitle(e.target.value)}
-                        className="text-2xl font-bold bg-background border-border h-12 min-w-96"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleSaveTitle();
-                          if (e.key === 'Escape') {
+    <DragDropProvider>
+      <div className="flex min-h-screen bg-background">
+        {/* Module Palette Sidebar */}
+        <div className="w-80 bg-background border-r border-border p-6 overflow-y-auto">
+          <ModulePalette />
+        </div>
+
+        {/* Main Timeline Area */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <div className="bg-card/95 backdrop-blur-sm border-b border-border px-6 py-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button variant="ghost" onClick={onBack} className="text-muted-foreground hover:text-foreground">
+                  ← Back to Courses
+                </Button>
+                <div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    {editingTitle ? (
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          value={courseTitle}
+                          onChange={(e) => setCourseTitle(e.target.value)}
+                          className="text-2xl font-bold bg-background border-border h-12 min-w-96"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveTitle();
+                            if (e.key === 'Escape') {
+                              setCourseTitle(course.title);
+                              setEditingTitle(false);
+                            }
+                          }}
+                          disabled={savingTitle}
+                          autoFocus
+                        />
+                        <Button 
+                          size="sm" 
+                          onClick={handleSaveTitle}
+                          disabled={savingTitle || courseTitle.trim() === ''}
+                          className="h-8"
+                        >
+                          {savingTitle ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                          ) : (
+                            <Save size={14} />
+                          )}
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => {
                             setCourseTitle(course.title);
                             setEditingTitle(false);
-                          }
-                        }}
-                        disabled={savingTitle}
-                        autoFocus
-                      />
-                      <Button 
-                        size="sm" 
-                        onClick={handleSaveTitle}
-                        disabled={savingTitle || courseTitle.trim() === ''}
-                        className="h-8"
-                      >
-                        {savingTitle ? (
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                        ) : (
-                          <Save size={14} />
-                        )}
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        onClick={() => {
-                          setCourseTitle(course.title);
-                          setEditingTitle(false);
-                        }}
-                        disabled={savingTitle}
-                        className="h-8"
-                      >
-                        <X size={14} />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2">
-                      <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                        {courseTitle}
-                      </h1>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        onClick={() => setEditingTitle(true)}
-                        className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
-                      >
-                        <Edit size={14} />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center space-x-4">
-                  <Badge variant="outline" className="bg-background text-foreground border-border">{course.subject}</Badge>
-                  <Badge variant="outline" className="bg-background text-foreground border-border">Grade {course.grade_level}</Badge>
-                  <Badge variant="outline" className="bg-background text-foreground border-border capitalize">{course.difficulty_level}</Badge>
-                  <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                    <Clock size={14} />
-                    <span>{getTotalDuration()} min total</span>
+                          }}
+                          disabled={savingTitle}
+                          className="h-8"
+                        >
+                          <X size={14} />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                          {courseTitle}
+                        </h1>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => setEditingTitle(true)}
+                          className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+                        >
+                          <Edit size={14} />
+                        </Button>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                    <Play size={14} />
-                    <span>{modules.length} modules</span>
+                  <div className="flex items-center space-x-4">
+                    <Badge variant="outline" className="bg-background text-foreground border-border">{course.subject}</Badge>
+                    <Badge variant="outline" className="bg-background text-foreground border-border">Grade {course.grade_level}</Badge>
+                    <Badge variant="outline" className="bg-background text-foreground border-border capitalize">{course.difficulty_level}</Badge>
+                    <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                      <Clock size={14} />
+                      <span>{getTotalDuration()} min total</span>
+                    </div>
+                    <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                      <Play size={14} />
+                      <span>{modules.length} modules</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setShowStudentSelector(true)}
-                className="bg-background hover:bg-accent border-border"
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Assign Students
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => {
-                  setShowCourseSettings(!showCourseSettings);
-                  setShowSettings(false);
-                  setSelectedModule(null);
-                }}
-                className="bg-background hover:bg-accent border-border"
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Course Settings
-              </Button>
-              {selectedModule && (
+              <div className="flex items-center space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowStudentSelector(true)}
+                  className="bg-background hover:bg-accent border-border"
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Assign Students
+                </Button>
                 <Button 
                   variant="outline"
-                  onClick={() => setShowSettings(!showSettings)}
+                  onClick={() => {
+                    setShowCourseSettings(!showCourseSettings);
+                    setShowSettings(false);
+                    setSelectedModule(null);
+                  }}
                   className="bg-background hover:bg-accent border-border"
                 >
                   <Settings className="mr-2 h-4 w-4" />
-                  Module Settings
+                  Course Settings
                 </Button>
-              )}
+                {selectedModule && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => setShowSettings(!showSettings)}
+                    className="bg-background hover:bg-accent border-border"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Module Settings
+                  </Button>
+                )}
+              </div>
             </div>
+          </div>
+
+          {/* Timeline Container */}
+          <div className="flex-1 p-8 bg-gradient-to-br from-background via-background to-muted/20 overflow-y-auto">
+            <SageTimeline
+              modules={modules}
+              onModuleSelect={handleModuleSelect}
+              onModuleCreate={handleCreateModule}
+              onModuleDelete={handleModuleDelete}
+              onModuleReorder={handleModuleReorder}
+              selectedModuleId={selectedModule?.id}
+            />
           </div>
         </div>
 
-        {/* Timeline Container */}
-        <div className="flex-1 p-8 bg-background overflow-y-auto">
-          <SageTimeline
-            modules={modules}
-            onModuleSelect={handleModuleSelect}
-            onModuleCreate={handleCreateModule}
-            onModuleDelete={handleModuleDelete}
-            selectedModuleId={selectedModule?.id}
-          />
-        </div>
-      </div>
+        {/* Settings Sidebar */}
+        {showSettings && selectedModule && (
+          <div className="w-96 bg-card/95 backdrop-blur-sm border-l border-border shadow-xl">
+            <SageModuleSettings
+              module={selectedModule}
+              onUpdate={handleModuleUpdate}
+              onClose={() => setShowSettings(false)}
+            />
+          </div>
+        )}
 
-      {/* Settings Sidebar */}
-      {showSettings && selectedModule && (
-        <div className="w-96 bg-card border-l border-border shadow-lg">
-          <SageModuleSettings
-            module={selectedModule}
-            onUpdate={handleModuleUpdate}
-            onClose={() => setShowSettings(false)}
-          />
-        </div>
-      )}
+        {/* Course Settings Sidebar */}
+        {showCourseSettings && (
+          <div className="w-96 bg-card/95 backdrop-blur-sm border-l border-border shadow-xl">
+            <SageCourseSettings
+              course={course}
+              onClose={() => setShowCourseSettings(false)}
+            />
+          </div>
+        )}
 
-      {/* Course Settings Sidebar */}
-      {showCourseSettings && (
-        <div className="w-96 bg-card border-l border-border shadow-lg">
-          <SageCourseSettings
+        {/* Student Selector Modal */}
+        {showStudentSelector && (
+          <SageStudentSelector
             course={course}
-            onClose={() => setShowCourseSettings(false)}
+            onClose={() => setShowStudentSelector(false)}
           />
-        </div>
-      )}
-
-      {/* Student Selector Modal */}
-      {showStudentSelector && (
-        <SageStudentSelector
-          course={course}
-          onClose={() => setShowStudentSelector(false)}
-        />
-      )}
-    </div>
+        )}
+      </div>
+    </DragDropProvider>
   );
 };
